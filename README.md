@@ -23,14 +23,40 @@
 - 이벤트 게시판 : 게시글 등록, 삭제, 목록조회, 상세조회, 쿠폰 등록 및 발급, 댓글 조회, 등록, 수정, 삭제
   
 ## 개발환경 
-#### Languages : <img src="https://img.shields.io/badge/Java-139BB4?style=flat:logo=Java&logoColor=white"/>  <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat:logo=HTML5&logoColor=white"/>  <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat:logo=CSS3&logoColor=white"/> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat:logo=JavaScript&logoColor=black"/>  <img src="https://img.shields.io/badge/Ajax-00B2FF?style=flat:logo=JavaScript&logoColor=black"/>  <img src="https://img.shields.io/badge/jQuery-0769AD?style=flat:logo=jQuery&logoColor=white"/>  <img src="https://img.shields.io/badge/JSTL-721412?style=flat:logo=JSTL&logoColor=white"/> 
-#### Framework / Library : <img src="https://img.shields.io/badge/Spring-6DB33F?style=flat:logo=Spring&logoColor=white"/>  <img src="https://img.shields.io/badge/MyBatis-1F8ACB?style=flat:logo=MyBatis&logoColor=white"/>  
-#### DB : <img src="https://img.shields.io/badge/Oracles-00C244?style=flat:logo=Oracle&logoColor=white"/>
-#### Was : <img src="https://img.shields.io/badge/Apache Tomcat-F8DC75?style=flat:logo=Apache Tomcat&logoColor=white"/>  
-#### IDE : <img src="https://img.shields.io/badge/STS-6DB33F?style=flat:logo=STS&logoColor=white"/> <img src="https://img.shields.io/badge/Oracle SQL Developer-00C244?style=flat:logo=Oracle SQL Developer&logoColor=white"/> <img src="https://img.shields.io/badge/Visual Studlo Code-1572B6?style=flat:logo=VisualStudioCode&logoColor=white"/>
-#### Collaborations : <img src="https://img.shields.io/badge/Slack-4A154B?style=flat:logo=Slack&logoColor=white"/>  <img src="https://img.shields.io/badge/GitHub-181717?style=flat:logo=GitHub&logoColor=white"/>
+#### Languages 
+<img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white">  <img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white">  <img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white">  <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">   <img src="https://img.shields.io/badge/jquery-0769AD?style=for-the-badge&logo=jquery&logoColor=white"> <img src="https://img.shields.io/badge/ajax-40AEF0?style=for-the-badge&logo=ajax&logoColor=white"> 
+
+#### Framework / Library 
+<img src="https://img.shields.io/badge/spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> <img src="https://img.shields.io/badge/myBatis-FF9E0F?style=for-the-badge&logo=myBatis&logoColor=white"> 
+
+#### DB 
+<img src="https://img.shields.io/badge/oracle-F80000?style=for-the-badge&logo=oracle&logoColor=white">
+
+#### WAS
+<img src="https://img.shields.io/badge/apache tomcat-F8DC75?style=for-the-badge&logo=apachetomcat&logoColor=white">
+
+#### IDE 
+<img src="https://img.shields.io/badge/STS-6DB33F?style=for-the-badge&logo=STS&logoColor=white"/> <img src="https://img.shields.io/badge/Oracle SQL Developer-F80000?style=for-the-badge&logo=Oracle SQL Developer&logoColor=white"/> <img src="https://img.shields.io/badge/Visual Studio Code-1572B6?style=for-the-badge&logo=VisualStudioCode&logoColor=white"/>
+
+#### Collaborations 
+<img src="https://img.shields.io/badge/slack-4A154B?style=for-the-badge&logo=slack&logoColor=white">  <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
 
 ## 프로젝트 상세 구현 내용
+#### 공지사항 게시판
+|공지사항 목록조회|공지사항 상세조회|공지사항 게시글 등록|공시사항 게시글 수정|
+|-----------|---------|------|--------|
+|이미지1|이미지2|이미지3|이미지4|
+
+#### FAQ + 1:1 채팅
+|FAQ 전체 목록|카테고리별 답변 화면|1:1 채팅 화면|1:1 채팅 관리자 페이지|
+|-----------|---------|------|--------|
+|이미지1|이미지2|이미지3|이미지4|
+
+#### 이벤트 게시판 
+|이벤트 게시판 목록조회|이벤트 게시판 상세조회|이벤트 게시글 및 쿠폰 등록|이벤트 참여방식(댓글+버튼응모)|쿠폰 발급|
+|-----------|---------|------|--------|----|
+|이미지1|이미지2|이미지3|이미지4|이미지5|
+
 
 
 
