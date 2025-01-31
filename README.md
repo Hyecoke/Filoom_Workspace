@@ -41,21 +41,34 @@
 #### Collaborations 
 <img src="https://img.shields.io/badge/slack-4A154B?style=for-the-badge&logo=slack&logoColor=white">  <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
 
+## USECASE & ERD Diagram
+![슬라이드4](https://github.com/user-attachments/assets/6aebe652-fa3c-4b82-b7bb-1108ebef0276)
+
+
 ## 프로젝트 상세 구현 내용
 #### 공지사항 게시판
-|공지사항 목록조회|공지사항 상세조회|공지사항 게시글 등록|공시사항 게시글 수정|
-|-----------|---------|------|--------|
-|이미지1|이미지2|이미지3|이미지4|
+|주요 기능|문제 해결 과정|
+|:---:|:---:|
+|![슬라이드5](https://github.com/user-attachments/assets/4b360a1a-e3e3-4319-b731-1089ac5cc049)|![슬라이드6](https://github.com/user-attachments/assets/f5b861ac-cc15-42d6-80ae-a3a4ca7ff9e7)|
+
 
 #### FAQ + 1:1 채팅
-|FAQ 전체 목록|카테고리별 답변 화면|1:1 채팅 화면|1:1 채팅 관리자 페이지|
-|-----------|---------|------|--------|
-|이미지1|이미지2|이미지3|이미지4|
+**주요기능**
+![슬라이드7](https://github.com/user-attachments/assets/5104e92a-48bc-4290-847e-ba42c8ba9618)
+
 
 #### 이벤트 게시판 
-|이벤트 게시판 목록조회|이벤트 게시판 상세조회|이벤트 게시글 및 쿠폰 등록|이벤트 참여방식(댓글+버튼응모)|쿠폰 발급|
-|-----------|---------|------|--------|----|
-|이미지1|이미지2|이미지3|이미지4|이미지5|
+|주요 기능|문제 해결 과정1|문제 해결 과정2|문제 해결 과정3|
+|:---:|:---:|:--:|:--:|
+|![슬라이드8](https://github.com/user-attachments/assets/0cbd3d5e-5cfc-4ba0-9380-30de4cf0f70c)|![슬라이드9](https://github.com/user-attachments/assets/e4392010-6cff-4568-822b-1f038aeaabae)|![슬라이드10](https://github.com/user-attachments/assets/2f75257e-71cd-4d5e-97fe-b2f3f1e5c449)|![슬라이드11](https://github.com/user-attachments/assets/41d0de7e-0fc2-462e-b6e0-f8b4e9bcb09d)|
+
+
+## 프로젝트 회고
+![슬라이드12](https://github.com/user-attachments/assets/9b712ae1-e9ef-4c58-be94-b30195764241)
+
+
+
+
 
 
 
