@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+	
+	<typeAliases>
+		
+		<typeAlias type = "com.kh.filoom.member.model.vo.Member" alias="member"/>
+		<typeAlias type = "com.kh.filoom.member.model.vo.Reserve" alias="reserve"/>
+		<typeAlias type = "com.kh.filoom.member.model.vo.History" alias="history"/>
+		<typeAlias type = "com.kh.filoom.member.model.vo.Favorite" alias="favorite"/>
+		<typeAlias type = "com.kh.filoom.member.model.vo.Coupon" alias="myCoupon"/>
+		<typeAlias type = "com.kh.filoom.member.model.vo.Review" alias="myReview"/>
+		
+		<typeAlias type = "com.kh.filoom.book.model.vo.Booking" alias="booking"/>
+		<typeAlias type = "com.kh.filoom.book.model.vo.BookingSeat" alias="bookingseat"/>
+		<typeAlias type = "com.kh.filoom.book.model.vo.Playing" alias="playing"/>
+		<typeAlias type = "com.kh.filoom.book.model.vo.Screen" alias="screen"/>
+		<typeAlias type = "com.kh.filoom.book.model.vo.ScreenSeat" alias="screenseat"/>
+		<typeAlias type = "com.kh.filoom.book.model.vo.Seat" alias="seat"/>
+		
+		<typeAlias type = "com.kh.filoom.movie.model.vo.Movie" alias="movie"/>
+		<typeAlias type = "com.kh.filoom.movie.model.vo.Poster" alias="poster"/>		
+		<typeAlias type = "com.kh.filoom.movie.model.vo.Review" alias="review"/>
+		
+		<typeAlias type = "com.kh.filoom.coupon.model.vo.Coupon" alias="coupon"/>
+		<typeAlias type = "com.kh.filoom.coupon.model.vo.CouponUser" alias="couponUser"/>
+		
+		<typeAlias type = "com.kh.filoom.event.model.vo.Event" alias="event" />
+		<typeAlias type = "com.kh.filoom.event.model.vo.EventAttachment" alias="eventAttachment" />
+		<typeAlias type = "com.kh.filoom.event.model.vo.Reply" alias="reply" />
+		<typeAlias type = "com.kh.filoom.event.model.vo.Applicant" alias="applicant" />
+		
+		<typeAlias type = "com.kh.filoom.notice.model.vo.Notice" alias="notice" />
+		
+		
+		<!-- 개인 사용을 위한 typeAlias -->
+		<typeAlias type = "com.kh.filoom.movie.model.vo.MovieWithPoster" alias="moviewithposter"/>		
+		<typeAlias type = "com.kh.filoom.common.model.vo.Chart" alias="chart"/>
+		
+	</typeAliases>
+	
+	<mappers>
+	
+		<mapper resource = "/mappers/member-mapper.xml"/>
+		<mapper resource = "/mappers/movie-mapper.xml"/>
+		<mapper resource = "/mappers/book-mapper.xml"/>
+		<mapper resource = "/mappers/coupon-mapper.xml"/>
+
+		<mapper resource = "/mappers/admin-mapper.xml"/>
+		<mapper resource = "/mappers/event-mapper.xml"/>
+		<mapper resource = "/mappers/notice-mapper.xml"/>
+
+	
+	</mappers>
+	
+</configuration>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="couponMapper">
+
+	<resultMap id="couponUserResultSet" type="couponUser">
+		<result column="COUPON_NO" property="couponNo"/>
+		<result column="USER_NO" property="userNo"/>
+		<result column="BOOK_NO" property="bookNo"/>
+		<result column="COUPON_USE" property="couponUse"/>
+		
+		<!-- 필요에 의해 추가(형문) -->
+		<result column="COUPON_NAME" property="couponName"/>
+		<result column="COUPON_EXP_DATE" property="couponExpDate"/>
+	</resultMap>
+
+	<!-- 혜원 쿠폰 발송 -->
+	<insert id="insertCouponUser" parameterType="map">
+		INSERT INTO COUPON_USER(COUPON_NO, USER_NO)
+		SELECT C.COUPON_NO
+		     , A.USER_NO
+		  FROM APPLICANT A
+		  JOIN COUPON C ON (A.REF_ENO = C.REF_ENO)
+		 WHERE A.REF_ENO = #{eventNo}
+		   AND A.USER_NO = #{userNo}
+	</insert>
+
+
+
+	<!-- 사용가능한 쿠폰조회(사용기한,상태유뮤) -->
+	<select id="selectListCouponUser" parameterType="int" resultMap="couponUserResultSet">
+		SELECT CU.* ,C.COUPON_NAME,C.COUPON_EXP_DATE
+		  FROM COUPON_USER CU
+		  JOIN COUPON C ON (CU.COUPON_NO = C.COUPON_NO)
+		 WHERE TRUNC(COUPON_EXP_DATE) > TRUNC(SYSDATE)
+		   AND USER_NO = #{userNo}
+		   AND BOOK_NO IS NULL
+		   AND COUPON_USE = 'X'
+		   AND COUPON_STATUS='Y'
+		 ORDER BY C.COUPON_EXP_DATE ASC 
+		   
+				
+	</select>
+
+	<!-- 결제전 쿠폰 유효성 검사 -->
+	<select id="selectCheckCoupon" parameterType="map" resultType="int">
+	  SELECT COUNT(CU.COUPON_NO)
+	 	FROM COUPON C
+		JOIN COUPON_USER CU ON (C.COUPON_NO = CU.COUPON_NO) 
+		<where>
+			COUPON_USE = 'X'
+		  	AND BOOK_NO IS NULL
+		  	AND USER_NO = #{userNo}
+		  	AND COUPON_STATUS='Y'
+			<foreach item="item" collection="couponNos" open="AND C.COUPON_NO IN (" separator="," close=")" > 
+				#{item}
+			</foreach>
+		</where>
+	</select>
+		
+	<!-- 쿠폰에 bookNo 추가하기(예비) -->
+	<update id="updateCouponUserDone" parameterType="map">
+		UPDATE COUPON_USER
+		   SET BOOK_NO = #{bookNo},
+		       COUPON_USE='O'
+			<where>
+				USER_NO = #{userNo}
+				<foreach item="item" collection="couponNos" open="AND COUPON_NO IN (" separator="," close=")" >
+					#{item}
+				</foreach>
+			</where>
+	</update>
+	
+	
+	<select id="selectListCouponUserList" parameterType="int" resultMap="couponUserResultSet">
+		SELECT CU.COUPON_NO,USER_NO,BOOK_NO,COUPON_USE,COUPON_NAME
+		  FROM COUPON_USER CU
+		  JOIN COUPON C ON(CU.COUPON_NO = C.COUPON_NO)
+		 WHERE BOOK_NO = #{bookNo}
+		   AND COUPON_STATUS='Y'
+	</select>
+
+	<update id="cancelUpdateCouponUser" parameterType="map">
+		UPDATE COUPON_USER 
+		   SET BOOK_NO = NULL,
+		       COUPON_USE = 'X'
+		 WHERE BOOK_NO = #{bookNo}
+		   AND USER_NO = #{userNo}
+	</update>
+	
+	
+</mapper>

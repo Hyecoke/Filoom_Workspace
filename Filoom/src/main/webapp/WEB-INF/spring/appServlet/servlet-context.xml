@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+	<annotation-driven />
+
+	
+	<resources mapping="/resources/**" location="/resources/" />
+	
+
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+	</beans:bean>
+	
+
+	<context:component-scan base-package="com.kh.filoom" />
+
+	<!-- 인터셉터 등록 -->
+	<interceptors>
+		<interceptor>
+			<mapping path="/myPage.me" />
+			<mapping path="/profile.me" />
+			<mapping path="/coupon.me" />
+			<mapping path="/reserve.me" />
+			<mapping path="/history.me" />
+			<mapping path="/favorite.me" />
+			<mapping path="/review.me" />
+			<mapping path="/withdrawal.me" />
+			
+			<mapping path="/ad.li"/>
+			<mapping path="/memberList_ad.me"/>
+			<mapping path="/movielist_ad.mo"/>
+			<mapping path="/adminBooking.ad"/>
+			<mapping path="/alist.ev"/>
+			
+			
+			<beans:bean class="com.kh.filoom.common.interceptor.LoginInterceptor" 
+						id="loginInterceptor" />
+		</interceptor>
+	</interceptors>
+
+</beans:beans>

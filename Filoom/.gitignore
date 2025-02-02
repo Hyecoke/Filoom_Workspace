@@ -1,0 +1,18 @@
+/.metadata/
+/.settings/
+/.classpath
+/.project
+/.springBeans
+/target/
+Servers/.project
+Servers/Tomcat v9.0 Server at localhost-config/catalina.policy
+Servers/Tomcat v9.0 Server at localhost-config/catalina.properties
+Servers/Tomcat v9.0 Server at localhost-config/context.xml
+Servers/Tomcat v9.0 Server at localhost-config/server.xml
+/Servers/Tomcat v9.0 Server at localhost-config
+Servers/.settings/org.eclipse.wst.server.core.prefs
+/Filoom/target
+Filoom/target/m2e-wtp/web-resources/META-INF/maven/com.kh/filoom/pom.properties
+*.properties
+/Filoom/target
+/Filoom/target

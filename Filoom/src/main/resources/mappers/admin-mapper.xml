@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="adminMapper">
+
+	<resultMap id="adminResultSet" type="chart">
+		<result column="TWO_MONTH_LATER_MEMBER_COUNT" property="twoMonthLaterMemberCount"/>
+		<result column="ONE_MONTH_LATER_MEMBER_COUNT" property="oneMonthLaterMemberCount"/>
+		<result column="CURRENT_MONTH_MEMBER_COUNT" property="currentMonthMemberCount"/>
+		<result column="ONE_MONTH_AFTER_MEMBER_COUNT" property="oneMonthAfterMemberCount"/>
+		<result column="TWO_MONTH_AFTER_MEMBER_COUNT" property="twoMonthAfterMemberCount"/>
+		<result column="TWO_MONTH_LATER_BOOK_COUNT" property="twoMonthLaterBookCount"/>
+		<result column="ONE_MONTH_LATER_BOOK_COUNT" property="oneMonthLaterBookCount"/>
+		<result column="CURRENT_MONTH_LATER_BOOK_COUNT" property="currentMonthLaterBookCount"/>
+		<result column="ONE_MONTH_AFTER_BOOK_COUNT" property="oneMonthAfterBookCount"/>
+		<result column="TWO_MONTH_AFTER_BOOK_COUNT" property="twoMonthAfterBookCount"/>
+		<result column="TEENAGER" property="teenager"/>
+		<result column="TWENTY" property="twenty"/>
+		<result column="THIRTY" property="thirty"/>
+		<result column="FOURTY" property="fourty"/>
+		<result column="FIFTY" property="fifty"/>
+		<result column="SIXTY" property="sixty"/>
+		<result column="ACTION" property="action"/>
+		<result column="HORROR" property="horror"/>
+		<result column="ROMANCE" property="romance"/>
+		<result column="DRAMA" property="drama"/>
+		<result column="DOCUMENTARY" property="documentary"/>
+		<result column="ANIMATION" property="animation"/>
+		<result column="MOVIE_COUNT" property="movieCount"/>
+		<result column="PLAYING_MOVIE_COUNT" property="playingMovieCount"/>
+		<result column="MEMBER_COUNT" property="memberCount"/>
+		<result column="TOTAL_INPUT" property="totalInput"/>
+	</resultMap>
+	
+	<resultMap id="movieResultSet" type="movie">
+		<id column="MOVIE_NO" property="movieNo" />
+		<result column="MOVIE_TITLE" property="movieTitle" />
+		<result column="PREMIERE" property="premiere" />
+		<result column="OPEN_DATE" property="openDate" />
+		<result column="DIRECTOR" property="director" />
+		<result column="GENRE" property="genre" />
+		<result column="RUNTIME" property="runtime" />
+		<result column="SCREEN_TYPE" property="screenType" />
+		<result column="FILM_RATE" property="filmRate" />
+		<result column="DESCRIPTION" property="description" />
+		<result column="STARRING" property="starring" />
+		<result column="STATUS" property="status" />
+		<result column="TRAILER" property="trailer"/>
+		
+		<!-- 포스터정보,상영정보,상영관정보 추가(결제페이지-형문) -->
+		<result column="IMAGE_PATH" property="imagePath"/>
+		<result column="FILE_CODENAME" property="fileCodename"/>
+		<result column="FILE_LEVEL" property="fileLevel"/>
+		<result column="PLAYING_NO" property="playingNo"/>
+		<result column="PLAYTIME" property="playTime"/>
+		<result column="SCREEN_NAME" property="screenName"/>
+		<result column="SCREEN_INFO" property="screenInfo"/>
+		<result column="SCREEN_NO" property="screenNo" />
+		
+		
+	</resultMap>
+	
+	<resultMap id ="posterResultSet" type="poster">
+		<id column="IMAGE_ID" property="imageId"/>
+		<result column="MOVIE_NO" property="movieNo"/>
+		<result column="FILE_NAME" property="fileName"/>
+		<result column="FILE_CODENAME" property="fileCodename"/>
+		<result column="IMAGE_PATH" property="imagePath"/>
+		<result column="UPLOAD_DATE" property="uploadDate"/>
+		<result column="FILE_LEVEL" property="fileLevel"/>
+		<result column="STATUS" property="status"/>	
+	</resultMap>
+	
+	<!-- 회원 나이 및 가입 날짜 -->
+	<select id = "adminListView" resultMap="adminResultSet">
+		SELECT 
+		    COUNT(CASE 
+		            WHEN EXTRACT(YEAR FROM SYSDATE) - SUBSTR(BIRTH, 1, 4) BETWEEN 10 AND 19 THEN 1 
+		          END) AS TEENAGER,
+		    COUNT(CASE 
+		            WHEN EXTRACT(YEAR FROM SYSDATE) - SUBSTR(BIRTH, 1, 4) BETWEEN 20 AND 29 THEN 1 
+		          END) AS TWENTY,
+		    COUNT(CASE 
+		            WHEN EXTRACT(YEAR FROM SYSDATE) - SUBSTR(BIRTH, 1, 4) BETWEEN 30 AND 39 THEN 1 
+		          END) AS THIRTY,
+		    COUNT(CASE 
+		            WHEN EXTRACT(YEAR FROM SYSDATE) - SUBSTR(BIRTH, 1, 4) BETWEEN 40 AND 49 THEN 1 
+		          END) AS FOURTY,
+		    COUNT(CASE 
+		            WHEN EXTRACT(YEAR FROM SYSDATE) - SUBSTR(BIRTH, 1, 4) BETWEEN 50 AND 59 THEN 1 
+		          END) AS FIFTY,
+		    COUNT(CASE 
+		            WHEN EXTRACT(YEAR FROM SYSDATE) - SUBSTR(BIRTH, 1, 4) >= 60 THEN 1 
+		          END) AS SIXTY,
+		    COUNT(CASE 
+		            WHEN TO_CHAR(ENROLL_DATE, 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, -2), 'YYYY-MM') THEN 1 
+		          END) AS TWO_MONTH_LATER_MEMBER_COUNT,
+		    COUNT(CASE 
+		            WHEN TO_CHAR(ENROLL_DATE, 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, -1), 'YYYY-MM') THEN 1 
+		          END) AS ONE_MONTH_LATER_MEMBER_COUNT,
+		    COUNT(CASE 
+		            WHEN TO_CHAR(ENROLL_DATE, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM') THEN 1 
+		          END) AS CURRENT_MONTH_MEMBER_COUNT,
+		    COUNT(CASE 
+		            WHEN TO_CHAR(ENROLL_DATE, 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, 1), 'YYYY-MM') THEN 1 
+		          END) AS ONE_MONTH_AFTER_MEMBER_COUNT,
+		    COUNT(CASE 
+		            WHEN TO_CHAR(ENROLL_DATE, 'YYYY-MM') = TO_CHAR(ADD_MONTHS(SYSDATE, 2), 'YYYY-MM') THEN 1 
+		          END) AS TWO_MONTH_AFTER_MEMBER_COUNT
+		FROM MEMBER
+	</select>
+	
+	<!-- 등록된 영화 개수, 상영중인 영화 개수  -->
+	<select id = "adminMovieList" resultMap = "adminResultSet">
+		SELECT COUNT(*) AS MOVIE_COUNT
+		FROM MOVIE
+	</select>
+	
+	<!-- 등록된 영화 개수, 상영중인 영화 개수  -->
+	<select id = "adminPlayingMovieList" resultMap = "adminResultSet">
+		SELECT COUNT(*) AS PLAYING_MOVIE_COUNT
+		FROM MOVIE
+		WHERE STATUS = 'Y'
+	</select>
+	
+	<!-- 회원 수 -->
+	<select id = "adminMemberCount" resultMap = "adminResultSet">
+		SELECT COUNT(*) AS MEMBER_COUNT
+		FROM MEMBER
+		WHERE STATUS = 'Y'
+		
+	</select>
+	
+	<!-- 월별 예메 수 -->
+	<select id = "adminTotalInput" resultMap = "adminResultSet">
+		SELECT
+		    COUNT(CASE WHEN TRUNC(MODIFY_DATE, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -2) THEN 1 END) AS TWO_MONTH_LATER_BOOK_COUNT,
+		    COUNT(CASE WHEN TRUNC(MODIFY_DATE, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1) THEN 1 END) AS ONE_MONTH_LATER_BOOK_COUNT,
+		    COUNT(CASE WHEN TRUNC(MODIFY_DATE, 'MM') = TRUNC(SYSDATE, 'MM') THEN 1 END) AS CURRENT_MONTH_BOOK_COUNT,
+		    COUNT(CASE WHEN TRUNC(MODIFY_DATE, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1) THEN 1 END) AS ONE_MONTH_AFTER_BOOK_COUNT,
+		    COUNT(CASE WHEN TRUNC(MODIFY_DATE, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 2) THEN 1 END) AS TWO_MONTH_AFTER_BOOK_COUNT
+		FROM 
+		    BOOKING
+		WHERE 
+		    STATUS = 'Y'
+	</select>
+	
+	<!-- 영화 장르  -->
+	<select id = "adminGenreCount" resultMap ="adminResultSet">
+		SELECT
+		    COUNT(CASE WHEN GENRE = '액션' THEN 1 END) AS ACTION,
+		    COUNT(CASE WHEN GENRE = '공포' THEN 1 END) AS HORROR,
+		    COUNT(CASE WHEN GENRE = '로맨스' THEN 1 END) AS ROMANCE,
+		    COUNT(CASE WHEN GENRE = '드라마' THEN 1 END) AS DRAMA,
+		    COUNT(CASE WHEN GENRE = '다큐멘터리' THEN 1 END) AS DOCUMENTARY,
+		    COUNT(CASE WHEN GENRE = '애니메이션' THEN 1 END) AS ANIMATION
+		FROM 
+		    MOVIE
+	</select>
+	
+	<select id = "adminTodayInput" resultMap="adminResultSet">
+		SELECT 
+		    SUM(BOOK_COST) AS TOTAL_INPUT
+		FROM 
+		    BOOKING
+		WHERE 
+		    STATUS = 'Y'
+		    OR (STATUS = 'Y' AND TRUNC(MODIFY_DATE) = TRUNC(SYSDATE))
+	
+	</select>
+	
+	
+	<!--  하단부터 메인  -->
+	
+	<!-- 영화의 영상 첫번쨰 메인  -->
+	<select id = "selectMovieMainMovieList" resultMap = "movieResultSet">
+		SELECT 
+		    M.MOVIE_TITLE,
+		    CASE 
+		        WHEN LENGTH(M.DESCRIPTION) &gt; 20 THEN SUBSTR(M.DESCRIPTION, 1, 16) || '...'
+		        ELSE M.DESCRIPTION
+		    END AS DESCRIPTION,
+		    M.TRAILER AS TRAILER,
+		    P.FILE_CODENAME AS FILE_CODENAME,
+		    P.IMAGE_PATH AS IMAGE_PATH
+		FROM 
+		    (SELECT 
+		         MOVIE_NO,
+		         MOVIE_TITLE, 
+		         DESCRIPTION, 
+		         TRAILER, 
+		         OPEN_DATE
+		     FROM 
+		         MOVIE
+		     WHERE 
+		         PREMIERE = 'Y'
+		     ORDER BY 
+		         OPEN_DATE DESC) M
+		LEFT JOIN POSTER P
+		ON M.MOVIE_NO = P.MOVIE_NO
+		WHERE 
+		    P.FILE_LEVEL = 1
+		    AND ROWNUM &lt;= 5
+	</select>
+	
+	
+	<!-- 메인페이지 두번째 영화 리뷰 보기 -->
+	
+	<!-- 
+	<select id = "seletMovieReview" resultMap = "movieResultSet">
+	
+		
+	
+	</select>
+	 -->
+	<!--  메인페이지 두번째 영화 포스터  -->
+	<!-- 
+	<select id = "selectMovieReviewPoster" resultMap = "movieResultSet">
+	
+	
+	</select>
+	 -->
+	<!-- 메인페이지 하단 영화의 리스트 --> 
+	<select id = "selectMovieMainList" resultMap = "movieResultSet">
+		SELECT *
+		FROM (
+		    SELECT ROWNUM RNUM, A.* 
+		    FROM (
+		        SELECT 
+		            M.MOVIE_NO,
+		            CASE 
+		                WHEN LENGTH(M.MOVIE_TITLE) &gt; 10 THEN SUBSTR(M.MOVIE_TITLE, 1, 10)
+		                ELSE M.MOVIE_TITLE
+		            END AS MOVIE_TITLE,
+		            TO_CHAR(M.OPEN_DATE, 'YYYY.MM.DD') AS 개봉일자,
+		            M.FILM_RATE,
+		            P.FILE_CODENAME,
+		            P.IMAGE_PATH
+		        FROM MOVIE M
+		        JOIN POSTER P ON M.MOVIE_NO = P.MOVIE_NO
+		        WHERE 
+		            M.STATUS = 'Y' 
+		            AND M.PREMIERE = 'Y'
+		            AND M.FILM_RATE != 19
+		            AND P.FILE_LEVEL = 1
+		        ORDER BY M.OPEN_DATE
+		    ) A
+		)
+		WHERE RNUM BETWEEN 1 AND 12
+	</select>
+
+	
+</mapper>

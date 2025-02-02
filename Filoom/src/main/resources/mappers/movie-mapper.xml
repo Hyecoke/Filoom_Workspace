@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="movieMapper">
+
+	<!-- 
+		Reply 테이블로부터 조회된 ResultSet을
+		Reply VO 타입으로 옮겨주는 ResultMap
+	-->
+	
+	<resultMap id="movieResultSet" type="movie">
+		<id column="MOVIE_NO" property="movieNo" />
+		<result column="MOVIE_TITLE" property="movieTitle" />
+		<result column="PREMIERE" property="premiere" />
+		<result column="OPEN_DATE" property="openDate" />
+		<result column="DIRECTOR" property="director" />
+		<result column="GENRE" property="genre" />
+		<result column="RUNTIME" property="runtime" />
+		<result column="SCREEN_TYPE" property="screenType" />
+		<result column="FILM_RATE" property="filmRate" />
+		<result column="DESCRIPTION" property="description" />
+		<result column="STARRING" property="starring" />
+		<result column="STATUS" property="status" />
+		<result column="TRAILER" property="trailer"/>
+		
+		<!-- 포스터정보,상영정보,상영관정보 추가(결제페이지-형문) -->
+		<result column="IMAGE_PATH" property="imagePath"/>
+		<result column="FILE_CODENAME" property="fileCodename"/>
+		<result column="FILE_LEVEL" property="fileLevel"/>
+		<result column="PLAYING_NO" property="playingNo"/>
+		<result column="PLAYTIME" property="playTime"/>
+		<result column="SCREEN_NAME" property="screenName"/>
+		<result column="SCREEN_INFO" property="screenInfo"/>
+		<result column="SCREEN_NO" property="screenNo" />
+		
+		
+	</resultMap>
+	
+	<resultMap id ="posterResultSet" type="poster">
+		<id column="IMAGE_ID" property="imageId"/>
+		<result column="MOVIE_NO" property="movieNo"/>
+		<result column="FILE_NAME" property="fileName"/>
+		<result column="FILE_CODENAME" property="fileCodename"/>
+		<result column="IMAGE_PATH" property="imagePath"/>
+		<result column="UPLOAD_DATE" property="uploadDate"/>
+		<result column="FILE_LEVEL" property="fileLevel"/>
+		<result column="STATUS" property="status"/>	
+	</resultMap>
+	
+	<resultMap id="movieWithPosterFlatResultMap" type="movie">
+	    <id column="MOVIE_NO" property="movieNo" />
+	    <result column="MOVIE_TITLE" property="movieTitle" />
+	    <result column="DESCRIPTION" property="description" />
+	    <result column="IMAGE_PATH" property="imagePath" />
+	    <result column="FILE_CODENAME" property="fileCodename" />
+	    <result column="FILE_LEVEL" property="fileLevel"/>
+	</resultMap>
+	
+	<resultMap id="reviewResultSet" type="review">
+		<id column="REVIEW_ID" property="reviewId" />
+		<result column="USER_NO" property="userNo" />
+		<result column="MOVIE_NO" property="movieNo" />
+		<result column="REVIEW_TITLE" property="reviewTitle" />
+		<result column="REVIEW_DATE" property="reviewDate" />
+		<result column="SCORE" property="score" />
+		<result column="IS_WATCHED" property="isWatched" />
+		<result column="REVIEW_CONTENT" property="reviewContent" />
+		<result column="IS_DELETED" property="isDeleted" />
+	    
+	    <!-- 다른 필드에서 가져온 것 -->
+	    <result column="USER_ID" property="userId" />
+	</resultMap>
+	
+	<!-- 이거 영화 예매 페이지 첫페이지 정보 가져오기 -->
+	<select id ="selectList" resultMap="movieResultSet">
+		SELECT M.MOVIE_NO
+		     , M.MOVIE_TITLE
+		     , M.PREMIERE
+		     , TO_CHAR(M.OPEN_DATE, 'YYYY MM DD') AS OPEN_DATE
+		     , M.RUNTIME
+		     , M.SCREEN_TYPE
+		     , M.FILM_RATE
+		     , M.DESCRIPTION
+		     , M.STARRING
+		     , M.STATUS
+		     , P.IMAGE_PATH
+		     , P.FILE_CODENAME
+		FROM MOVIE M
+		LEFT JOIN POSTER P
+		ON M.MOVIE_NO = P.MOVIE_NO
+		   AND P.FILE_LEVEL = 1
+	   WHERE M.STATUS = 'Y'
+	</select>
+	
+	<select id = "selectFirstMovie" resultMap="movieResultSet">
+		SELECT M.MOVIE_NO
+		     , M.MOVIE_TITLE
+		     , M.PREMIERE
+		     , M.OPEN_DATE
+		     , M.RUNTIME
+		     , M.SCREEN_TYPE
+		     , M.FILM_RATE
+		     , CASE 
+			        WHEN LENGTH(M.DESCRIPTION) > 120 THEN SUBSTR(M.DESCRIPTION, 1, 120) || '...'
+			        ELSE M.DESCRIPTION
+		       END AS DESCRIPTION
+		     , M.STARRING
+		     , M.STATUS
+		     , P.IMAGE_PATH
+		     , P.FILE_LEVEL
+		     , P.FILE_CODENAME
+		FROM MOVIE M
+		JOIN POSTER P 
+		    ON M.MOVIE_NO = P.MOVIE_NO
+		WHERE M.STATUS = 'Y'
+		  AND M.MOVIE_NO = (SELECT MIN(MOVIE_NO)
+		                    FROM MOVIE
+		                    WHERE STATUS = 'Y')
+	
+	</select>
+	
+	<select id = "selectSearchFirstMovie" parameterType="hashmap" resultMap="movieResultSet">
+		
+		SELECT M.MOVIE_NO
+		     , M.MOVIE_TITLE
+		     , M.PREMIERE
+		     , M.OPEN_DATE
+		     , M.RUNTIME
+		     , M.SCREEN_TYPE
+		     , M.FILM_RATE
+		     , CASE 
+			        WHEN LENGTH(M.DESCRIPTION) > 120 THEN SUBSTR(M.DESCRIPTION, 1, 120) || '...'
+			        ELSE M.DESCRIPTION
+		       END AS DESCRIPTION
+		     , M.STARRING
+		     , M.STATUS
+		     , P.IMAGE_PATH
+		     , P.FILE_LEVEL
+		     , P.FILE_CODENAME
+		FROM MOVIE M
+		JOIN POSTER P 
+		    ON M.MOVIE_NO = P.MOVIE_NO
+		WHERE M.STATUS = 'Y'
+		  AND M.MOVIE_NO = (
+		        SELECT MIN(MOVIE_NO)
+		        FROM MOVIE
+		        WHERE STATUS = 'Y'
+		          AND MOVIE_TITLE LIKE '%' || #{searchMovieKeyword} || '%'
+		    )
+	
+	</select>
+	
+	<!-- 미성년자 예매페이지 검색 기능 -->
+	<select id = "movieSearchKid" parameterType="hashmap" resultMap="movieResultSet">
+		
+		SELECT 
+	        M.MOVIE_NO,
+	        M.MOVIE_TITLE,
+	        M.PREMIERE,
+	        TO_CHAR(M.OPEN_DATE, 'YYYY MM DD') AS OPEN_DATE,
+	        M.RUNTIME,
+	        M.SCREEN_TYPE,
+	        M.FILM_RATE,
+	        M.DESCRIPTION,
+	        M.STARRING,
+	        M.STATUS,
+	        P.IMAGE_PATH,
+	        P.FILE_CODENAME
+	    FROM 
+	        MOVIE M
+	    LEFT JOIN 
+	        POSTER P
+	    ON 
+	        M.MOVIE_NO = P.MOVIE_NO
+	        AND P.FILE_LEVEL = 1
+	    WHERE 
+	        M.MOVIE_TITLE LIKE '%' || #{searchMovieKeyword} || '%'
+	        AND M.STATUS = 'Y'
+	        AND M.FILM_RATE &lt;&gt; 19
+		 
+	
+	</select>
+	
+	<!-- 미성년자용 검색 첫 -->
+	<select id = "selectSearchFirstMovieKid" parameterType="hashmap" resultMap="movieResultSet">
+		
+		 SELECT 
+	        M.MOVIE_NO,
+	        M.MOVIE_TITLE,
+	        M.PREMIERE,
+	        M.OPEN_DATE,
+	        M.RUNTIME,
+	        M.SCREEN_TYPE,
+	        M.FILM_RATE,
+	        CASE 
+	            WHEN LENGTH(M.DESCRIPTION) &gt; 120 THEN SUBSTR(M.DESCRIPTION, 1, 120) || '...'
+	            ELSE M.DESCRIPTION
+	        END AS DESCRIPTION,
+	        M.STARRING,
+	        M.STATUS,
+	        P.IMAGE_PATH,
+	        P.FILE_LEVEL,
+	        P.FILE_CODENAME
+	    FROM 
+	        MOVIE M
+	    JOIN 
+	        POSTER P 
+	    ON 
+	        M.MOVIE_NO = P.MOVIE_NO
+	    WHERE 
+	        M.STATUS = 'Y'
+	        AND M.FILM_RATE &lt;&gt; 19
+	        AND M.MOVIE_NO = (
+	            SELECT 
+	                MIN(MOVIE_NO)
+	            FROM 
+	                MOVIE
+	            WHERE 
+	                STATUS = 'Y'
+	                AND MOVIE_TITLE LIKE '%' || #{searchMovieKeyword} || '%'
+	                AND FILM_RATE &lt;&gt; 19
+	        )
+	
+	</select>
+	
+	<!-- 이거 영화 예매 페이지 첫페이지 상세정보 가져오기 -->
+	<select id = "selectMovie" parameterType="_int" resultMap="movieWithPosterFlatResultMap">
+	
+		SELECT 
+		    M.MOVIE_NO,
+		    M.MOVIE_TITLE,
+		    CASE 
+		        WHEN LENGTH(M.DESCRIPTION) > 120 THEN SUBSTR(M.DESCRIPTION, 1, 120) || '...'
+		        ELSE M.DESCRIPTION
+		    END AS DESCRIPTION,
+		    P.IMAGE_PATH,
+		    P.FILE_CODENAME,
+		    P.FILE_LEVEL
+		FROM 
+		    FILOOM.MOVIE M
+		LEFT JOIN 
+		    FILOOM.POSTER P
+		ON 
+		    M.MOVIE_NO = P.MOVIE_NO
+		WHERE 
+		
+		    M.MOVIE_NO = #{movieNo}
+	
+	</select>
+
+	<!-- 예매페이지 검색 기능 -->
+	<select id = "movieSearch" parameterType="hashmap" resultMap="movieResultSet">
+		
+		SELECT M.MOVIE_NO
+		     , M.MOVIE_TITLE
+		     , M.PREMIERE
+		     , TO_CHAR(M.OPEN_DATE, 'YYYY MM DD') AS OPEN_DATE
+		     , M.RUNTIME
+		     , M.SCREEN_TYPE
+		     , M.FILM_RATE
+		     , M.DESCRIPTION
+		     , M.STARRING
+		     , M.STATUS
+		     , P.IMAGE_PATH
+		     , P.FILE_CODENAME
+		FROM MOVIE M
+		LEFT JOIN POSTER P
+		ON M.MOVIE_NO = P.MOVIE_NO
+		   AND P.FILE_LEVEL = 1
+		WHERE M.MOVIE_TITLE LIKE '%' || #{searchMovieKeyword} || '%'
+		  AND M.STATUS = 'Y'
+		 
+	
+	</select>
+
+	<select id ="selectListKid" resultMap="movieResultSet">
+		SELECT 
+		    M.MOVIE_NO,
+		    M.MOVIE_TITLE,
+		    M.PREMIERE,
+		    TO_CHAR(M.OPEN_DATE, 'YYYY MM DD') AS OPEN_DATE,
+		    M.RUNTIME,
+		    M.SCREEN_TYPE,
+		    M.FILM_RATE,
+		    M.DESCRIPTION,
+		    M.STARRING,
+		    M.STATUS,
+		    P.IMAGE_PATH,
+		    P.FILE_CODENAME
+		FROM 
+		    MOVIE M
+		LEFT JOIN 
+		    POSTER P
+		ON 
+		    M.MOVIE_NO = P.MOVIE_NO
+		    AND P.FILE_LEVEL = 1
+		WHERE 
+		    M.STATUS = 'Y'
+		    AND M.FILM_RATE  &lt;&gt; 19
+	</select>
+
+	<select id ="selectFirstMovieKid" resultMap="movieResultSet">
+		SELECT 
+	        M.MOVIE_NO,
+	        M.MOVIE_TITLE,
+	        M.PREMIERE,
+	        M.OPEN_DATE,
+	        M.RUNTIME,
+	        M.SCREEN_TYPE,
+	        M.FILM_RATE,
+	        CASE 
+	            WHEN LENGTH(M.DESCRIPTION) > 120 THEN SUBSTR(M.DESCRIPTION, 1, 120) || '...'
+	            ELSE M.DESCRIPTION
+	        END AS DESCRIPTION,
+	        M.STARRING,
+	        M.STATUS,
+	        P.IMAGE_PATH,
+	        P.FILE_LEVEL,
+	        P.FILE_CODENAME
+	    FROM 
+	        MOVIE M
+	    JOIN 
+	        POSTER P 
+	    ON 
+	        M.MOVIE_NO = P.MOVIE_NO
+	    WHERE 
+	        M.STATUS = 'Y'
+	        AND M.FILM_RATE &lt;&gt; 19
+	        AND M.MOVIE_NO = (
+	            SELECT MIN(MOVIE_NO)
+	            FROM MOVIE
+	            WHERE STATUS = 'Y'
+	              AND FILM_RATE &lt;&gt; 19
+	        )
+	
+	</select>
+
+
+	<!-- 결제페이지 : 영화,상영정보 조회 -->
+	<select id="selectMovieForPlayingNo" parameterType="hashmap" resultMap="movieResultSet">
+		SELECT MOVIE_NO, MOVIE_TITLE, DIRECTOR, GENRE, RUNTIME, FILM_RATE, FILE_CODENAME, IMAGE_PATH, PLAYING_NO, PLAYTIME,SCREEN_NAME, SCREEN_INFO
+		  FROM MOVIE M 
+		  JOIN POSTER  USING(MOVIE_NO)
+		  JOIN PLAYING  USING(MOVIE_NO)
+		  JOIN SCREEN USING(SCREEN_NO)
+		 WHERE PLAYING_NO = #{playingNo}
+		   AND FILE_LEVEL = 1
+	</select>
+
+	
+	<!-- 작품 수 체크(필터링 없음) -->
+	<!-- 전체 (사용자 / 관리자) -->
+	<select id="checkVideoCount" resultType="_int">
+		SELECT COUNT(*) FROM MOVIE
+		WHERE STATUS = 'Y'
+	</select>
+	
+	<!-- 개봉작만 (사용자 / 관리자) -->
+	<select id="checkOpenedVideoCount" resultType="_int">
+		SELECT COUNT(*) FROM MOVIE
+		WHERE STATUS = 'Y' AND PREMIERE = 'Y'
+	</select>
+	
+	<!-- 미개봉작만 (사용자) -->
+	<select id="checkNotOpenVideoCount" resultType="_int">
+		SELECT COUNT(*) FROM MOVIE
+		WHERE STATUS = 'Y' AND PREMIERE = 'N'
+	</select>
+	
+	<!--  ===== BOXOFFICE 목록 조회 ===== -->
+	<!-- 전체 조회 (4x4) -->
+	<!-- USING을 썼기 때문에 M.MOVIE_NO가 아닌 MOVIE_NO로 SELECT했음
+		└ M.MOVIE_NO로 쓰면 오류남 (ORA-21254)
+		이후의 목록 조회 테이블도 마찬가지로 USING을 사용함 -->
+	<!-- selectNowPlaying과 합쳐서 동적 쿼리로 쓰고 싶어서 알아보는 중 -->
+	<select id="selectBoxOffice" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+           				THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+               			ELSE MOVIE_TITLE
+       				END AS MOVIE_TITLE,
+					PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE", FILM_RATE,
+					P.IMAGE_PATH, P.FILE_CODENAME
+				FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+				WHERE M.STATUS = 'Y' AND P.FILE_LEVEL = 1
+				ORDER BY MOVIE_NO DESC
+			) A
+		) WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}
+	</select>
+	
+	<!-- 개봉작만 조회 -->
+	<select id="selectNowPlaying" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+		            	THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+		                ELSE MOVIE_TITLE
+		            END AS MOVIE_TITLE,
+		            PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+		            FILM_RATE, P.FILE_CODENAME
+				FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+				WHERE M.STATUS = 'Y' AND PREMIERE = 'Y' AND P.FILE_LEVEL = 1
+				ORDER BY MOVIE_NO DESC				
+			) A
+		) WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}
+	</select>
+	
+	<!-- 개봉순 정렬 (페이징 처리 포함) -->
+	<select id="listbyOpenedOrder" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+	            		THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+	                	ELSE MOVIE_TITLE
+	            	END AS MOVIE_TITLE,				
+					PREMIERE,
+					TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+					FILM_RATE, P.FILE_CODENAME
+				FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+				WHERE M.STATUS = 'Y' AND PREMIERE = 'Y' AND P.FILE_LEVEL = 1
+				ORDER BY OPEN_DATE	
+			) A
+		)
+		WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}
+	</select>
+	
+	<!-- 평점순 정렬 (review와 조인 필요) -->
+	<select id="listbyCritics" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT M.MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+		            	THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+		                ELSE MOVIE_TITLE
+		            END AS MOVIE_TITLE,
+		            PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+					FILM_RATE, P.FILE_CODENAME,
+                    NVL(AVG(R.SCORE), 0) AS SCORE
+                FROM MOVIE M JOIN POSTER P ON M.MOVIE_NO = P.MOVIE_NO
+                    LEFT JOIN REVIEW R ON M.MOVIE_NO = R.MOVIE_NO
+				WHERE M.STATUS = 'Y' AND PREMIERE = 'Y' AND P.FILE_LEVEL = 1
+                GROUP BY M.MOVIE_NO, M.MOVIE_TITLE, M.PREMIERE, M.OPEN_DATE, M.FILM_RATE, P.FILE_CODENAME
+				ORDER BY SCORE DESC
+			) A
+		) WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}
+	</select>
+	
+	<!-- 가나다순 정렬 (전체) -->
+	<select id="listbyName" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+		            	THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+		                ELSE MOVIE_TITLE
+		            END AS MOVIE_TITLE,
+		            PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+		            FILM_RATE, P.FILE_CODENAME
+				FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+				WHERE M.STATUS = 'Y' AND P.FILE_LEVEL = 1
+				ORDER BY MOVIE_TITLE
+			) A
+		) WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}
+	</select>
+	
+	<!-- 가나다순 정렬 (개봉작만) -->
+	<select id="listbyNamePlaying" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+		            	THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+		                ELSE MOVIE_TITLE
+		            END AS MOVIE_TITLE,
+		            PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+		            FILM_RATE, P.FILE_CODENAME
+				FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+				WHERE M.STATUS = 'Y' AND PREMIERE = 'Y' AND P.FILE_LEVEL = 1
+				ORDER BY MOVIE_TITLE
+			) A
+		) WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}	
+	</select>
+	
+	<!-- ===== 상영 예정작 목록 조회 ===== -->
+	<!-- 개봉예정일 순서로 정렬 (기본 정렬 기준) -->
+	<select id="listbyOpenOrder" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (		
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+		            	THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+		                ELSE MOVIE_TITLE
+		            END AS MOVIE_TITLE,
+		            PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+		            FILM_RATE, P.FILE_CODENAME
+				FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+				WHERE M.STATUS = 'Y' AND PREMIERE = 'N' AND P.FILE_LEVEL = 1	
+				ORDER BY OPEN_DATE
+			) A
+		) WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}
+	</select>
+	
+	<!-- 가나다순 정렬 -->
+	<select id="listbyNamePre" parameterType="int" resultMap="movieResultSet">
+		SELECT * FROM (		
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT MOVIE_NO,
+					CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+		            	THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+		                ELSE MOVIE_TITLE
+		            END AS MOVIE_TITLE,
+		            PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+		            FILM_RATE, P.FILE_CODENAME
+				FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+				WHERE M.STATUS = 'Y' AND PREMIERE = 'N' AND P.FILE_LEVEL = 1
+				ORDER BY MOVIE_TITLE
+			) A
+		) WHERE RNUM BETWEEN 16*(#{cpage}-1)+1 AND 16*#{cpage}
+	</select>
+	
+	
+	<!-- 영화 탭 HOME -->
+	<!-- 박스 오피스 관리자 등록 빠른 순으로 4개
+		추후 표기 기준 수정 예정. 개인적으로 예매순 하고 싶으나 아직 보류 상태 -->
+	<select id="selectNow4" resultMap="movieResultSet">
+		SELECT * FROM (
+		    SELECT MOVIE_NO,
+			    CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+	            	THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+	                ELSE MOVIE_TITLE
+	            END AS MOVIE_TITLE,
+            	PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+            	FILM_RATE, P.FILE_CODENAME
+		    FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+		    WHERE M.STATUS = 'Y' AND P.FILE_LEVEL = 1
+		    ORDER BY MOVIE_NO DESC
+		) WHERE ROWNUM BETWEEN 1 AND 4
+	</select>
+	
+	<!-- 개봉예정일이 가까운 순으로 4개 -->
+	<select id="comingVerySoon" resultMap="movieResultSet">
+		select rownum, a.* from (
+			SELECT MOVIE_NO,
+			    CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+			        THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+			        ELSE MOVIE_TITLE
+			    END AS MOVIE_TITLE,
+			    PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+			    FILM_RATE, P.FILE_CODENAME
+			FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+			WHERE M.STATUS = 'Y' AND PREMIERE = 'N' AND P.FILE_LEVEL = 1
+				AND ROWNUM BETWEEN 1 AND 4	
+		ORDER BY OPEN_DATE) a
+	</select>
+	
+	<!-- 제목으로 영화 검색 : 정렬 기준은 MOVIE_NO DESC 하나로 고정
+		hashmap = (String keyword, (int→)String status) -->
+	<select id="searchMovie" parameterType="hashmap" resultMap="movieResultSet">
+		SELECT MOVIE_NO,
+			    CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+			        THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+			        ELSE MOVIE_TITLE
+			    END AS MOVIE_TITLE,
+			    PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+			    FILM_RATE, P.FILE_CODENAME
+	    FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+	    WHERE M.STATUS = 'Y'
+	    <choose>
+	    	<when test="status == 1">
+	    		AND PREMIERE = 'Y'
+	    	</when>
+	    	<when test="status == 2">
+	    		AND PREMIERE = 'N'
+	    	</when>
+	    </choose>
+	     AND P.FILE_LEVEL = 1
+	    	AND MOVIE_TITLE LIKE '%' || #{keyword} || '%'
+	    ORDER BY MOVIE_NO DESC
+	</select>
+
+	<!-- 개봉 예정작 - 제목으로 영화 검색 -->
+	<select id="searchFromPreOpen" parameterType="string" resultMap="movieResultSet">
+		SELECT MOVIE_NO,
+			    CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+			        THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+			        ELSE MOVIE_TITLE
+			    END AS MOVIE_TITLE,
+			    PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE",
+			    FILM_RATE, P.FILE_CODENAME
+	    FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+	    WHERE M.STATUS = 'Y' AND PREMIERE = 'N' AND P.FILE_LEVEL = 1
+	    	AND MOVIE_TITLE LIKE '%' || #{keyword} || '%'
+	    ORDER BY MOVIE_NO DESC
+	</select>
+	
+	<!-- === 영화 상세 페이지 (사용자) === -->
+	
+	<!-- 영화 페이지 상세 보기 -->
+	<select id = "showDetail" parameterType="int" resultMap="movieResultSet">
+
+		SELECT MOVIE_NO, MOVIE_TITLE,
+		    TO_CHAR(OPEN_DATE, 'YYYY.MM.DD') AS "OPEN_DATE",
+		    PREMIERE, DIRECTOR, GENRE, RUNTIME, SCREEN_TYPE,
+		    FILM_RATE, DESCRIPTION, STARRING, TRAILER,
+		    P.FILE_CODENAME
+		FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+		WHERE MOVIE_NO = #{movieNo} AND M.STATUS = 'Y' AND P.FILE_LEVEL = 1
+	
+	</select>
+	
+	<!-- 상세 페이지 로딩 시, 스틸컷 목록도 함께 조회 -->
+	<select id="selectImageList" parameterType="_int" resultMap="posterResultSet">
+		SELECT FILE_CODENAME FROM POSTER
+		WHERE MOVIE_NO = #{movieNo}
+		ORDER BY IMAGE_ID DESC
+	</select>
+	
+	<!-- 상세 페이지 조회시 좋아요 수 조회 용도
+		투입값 : int movieNo, 결과값 : COUNT(*) -->
+	<select id="checkFavCount" parameterType="int" resultType="int">
+		SELECT COUNT(*) FROM FAVORITE
+		WHERE MOVIE_NO = #{movieNo}
+	</select>
+	
+	<!-- 로그인한 유저가 좋아요를 눌렀는지 체크 -->
+	<select id="checkTaste" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*) FROM FAVORITE
+		WHERE MOVIE_NO = #{movieNo} AND USER_NO = #{userNo}
+	</select>
+	
+	<!-- 좋아요 추가 -->
+	<insert id="likeThis" parameterType="hashmap">
+		INSERT INTO FAVORITE VALUES(#{userNo}, #{movieNo})
+	</insert>
+	
+	<!-- 좋아요 제거 -->
+	<delete id="notLikeThis" parameterType="hashmap">
+		DELETE FROM FAVORITE
+		WHERE USER_NO = #{userNo} AND MOVIE_NO = #{movieNo}
+	</delete>
+	
+	<!-- === 상세 페이지 하단의 리뷰 기능과 관련된 쿼리는 관리자쪽 리뷰 부분에 같이 있음 -->
+
+	<!-- === 영화 추가 페이지 === -->
+	<insert id="addMovie" parameterType="movie">
+		INSERT INTO MOVIE (
+			MOVIE_NO, MOVIE_TITLE, OPEN_DATE, DIRECTOR,
+			GENRE, RUNTIME, SCREEN_TYPE, FILM_RATE,
+			DESCRIPTION, STARRING, TRAILER)
+		VALUES (
+			SEQ_MNO.NEXTVAL, #{movieTitle}, #{openDate}, #{director},
+			#{genre}, #{runtime}, #{screenType}, #{filmRate},
+			#{description}, #{starring}, #{trailer})
+		<selectKey keyProperty="movieNo" resultType="_int" order="AFTER">
+			SELECT SEQ_MNO.CURRVAL FROM DUAL
+		</selectKey>
+	</insert>
+	
+	<delete id="undoAddMovie" parameterType="_int">
+		DELETE FROM MOVIE
+		WHERE MOVIE_NO = #{movieNo}
+	</delete>
+	
+	<!-- 이미지 추가 (영화 추가/수정 공통) -->
+	<insert id="addPoster" parameterType="poster">
+		INSERT INTO POSTER (
+		    IMAGE_ID, MOVIE_NO, FILE_NAME, FILE_CODENAME,
+		    IMAGE_PATH, FILE_LEVEL
+		) VALUES (
+		    SEQ_IMG.NEXTVAL, #{movieNo}, #{fileName}, #{fileCodename},
+		    #{imagePath}, 1)
+	</insert>
+	
+	<!-- === 영화 수정 페이지 === -->
+	<!-- 기존 영화 정보를 페이지 내 input의 value값으로 집어넣기 -->
+	<select id="selectMovietoModify" parameterType="_int" resultMap="movieResultSet">
+		SELECT MOVIE_NO, MOVIE_TITLE,
+			TO_CHAR(OPEN_DATE, 'YYYY-MM-DD') AS OPEN_DATE, PREMIERE,
+			DIRECTOR, GENRE, RUNTIME, SCREEN_TYPE, FILM_RATE,
+			DESCRIPTION, STARRING, TRAILER,
+			P.IMAGE_ID, P.IMAGE_PATH, P.FILE_CODENAME
+		FROM MOVIE M JOIN POSTER P USING (MOVIE_NO) 
+		WHERE M.STATUS = 'Y' AND MOVIE_NO = #{movieNo} AND P.FILE_LEVEL = 1
+	</select>
+	
+	<!-- === 영화 수정 페이지 === -->
+	<update id="updateMovie" parameterType="movie">
+		UPDATE MOVIE
+		SET MOVIE_TITLE = #{movieTitle}, OPEN_DATE = #{openDate},
+			DIRECTOR = #{director}, GENRE = #{genre},
+			RUNTIME = #{runtime}, SCREEN_TYPE = #{screenType},
+			FILM_RATE = #{filmRate}, DESCRIPTION = #{description},
+			STARRING = #{starring}, TRAILER = #{trailer}
+		WHERE STATUS = 'Y' AND MOVIE_NO = #{movieNo}
+	</update>
+	
+	<!-- 포스터 변경용 -->
+	<update id="changePoster" parameterType="poster">
+		UPDATE POSTER
+		SET FILE_NAME = #{fileName}, FILE_CODENAME = #{fileCodename},
+		    IMAGE_PATH = #{imagePath}
+		WHERE MOVIE_NO = #{movieNo} AND FILE_LEVEL = 1
+	</update>
+	
+	<!-- === 영화 삭제 페이지 === -->
+	<update id="deleteMovie" parameterType="_int">
+		UPDATE MOVIE
+		SET STATUS = 'N'
+		WHERE MOVIE_NO = #{movieNo}
+	</update>
+	<!-- 포스터 삭제용 -->
+	<delete id="deletePoster" parameterType="_int">
+		DELETE FROM POSTER
+		WHERE MOVIE_NO = #{movieNo}
+	</delete>
+	<!-- 일단 포스터 변경/삭제 모두 DB에서도 삭제하기로 하였음 -->
+	
+	
+	<!-- === 관리자 전용 영화 쿼리 페이지 === -->
+	<!-- 여기는 별일 없으면 페이징 처리 안 하기로 해서 따로 쿼리 만들었음 -->
+	<select id="adminMovieList" parameterType="_int" resultMap="movieResultSet">
+		SELECT MOVIE_NO,
+			CASE WHEN (LENGTH(MOVIE_TITLE) > 9)
+     			THEN SUBSTR(MOVIE_TITLE,1,9) || '...'
+         		ELSE MOVIE_TITLE
+ 			END AS MOVIE_TITLE,
+			PREMIERE, TO_CHAR(OPEN_DATE,'YYYY.MM.DD') AS "OPEN_DATE", FILM_RATE,
+			P.IMAGE_PATH, P.FILE_CODENAME
+		FROM MOVIE M JOIN POSTER P USING (MOVIE_NO)
+		WHERE M.STATUS = 'Y' AND P.FILE_LEVEL = 1
+		<if test='isOpen >= 1'>
+			AND PREMIERE = 'Y'
+		</if>
+		ORDER BY MOVIE_NO DESC
+	</select>
+	
+	<!-- 관리자 상세 - 개봉 여부 변경 -->
+	<update id="togglePremiere" parameterType="hashmap">
+		UPDATE MOVIE
+		SET PREMIERE = DECODE(#{premiere}, 1, 'Y', 0, 'N')
+		WHERE MOVIE_NO = #{movieNo}
+	</update>
+	
+	<!-- 상영 정보 조회 -->
+	
+	<!-- 원래 PLAYTIME을 PDATE와 STIME으로 나눠서 TO_CHAR하려 했다가 바꿨음 -->
+	<!-- 이거랑 newRunInfo의 resultMap을 playingResultSet으로 바꿔도 괜찮은가? -->
+	<select id="showRunInfo" parameterType="_int" resultMap="movieResultSet">
+		SELECT PLAYING_NO, PLAYTIME, SCREEN_NO
+		FROM PLAYING PL JOIN MOVIE M USING (MOVIE_NO)
+		WHERE MOVIE_NO = #{movieNo} AND PL.STATUS = 'Y'
+	</select>
+	<select id="checkRunCount" parameterType="_int" resultType="_int">
+		SELECT COUNT(*) FROM PLAYING PL JOIN MOVIE M USING (MOVIE_NO)
+		WHERE PL.STATUS = 'Y' AND MOVIE_NO = #{movieNo}
+	</select>
+	
+	<!-- 상영 정보 추가 -->
+	<!-- 정보 추가 전, 선택한 상영관(1 or 2)이 존재하는지 확인하기 -->
+	<!-- 상영관 정보가 없으면 #newRunInfo 실행시 'parent key not found' 오류남
+		에러나지 말라고 굳이 만들었음 -->
+	<select id="checkScreen" parameterType="_int" resultType="_int">
+		SELECT COUNT(*) FROM SCREEN
+		WHERE SCREEN_NO = #{screenNo}
+	</select>
+	
+	<!-- 만약 '상영관이 없다'고 뜰 경우, SQL에 다음 쿼리로 더미 상영관을 넣어주세요.
+		INSERT INTO SCREEN VALUES
+			(SEQ_SCR.NEXTVAL, 1, 60, null)
+	-->
+	
+	<!-- 상영 정보 조회 기능 확인 용도로 더미데이터 삽입 시, PLAYTIME 부분만 다음 예시와 같이 바꿔 입력할 것↓
+		 TO_DATE('2024-12-27 15:15:00','YYYY-MM-DD HH24:MI:SS') -->
+	<insert id="newRunInfo" parameterType="movie">
+		INSERT INTO PLAYING(PLAYING_NO, PLAYTIME, MOVIE_NO, SCREEN_NO)
+		VALUES(SEQ_PLA.NEXTVAL, #{playTime}, #{movieNo}, #{screenNo})
+	</insert>
+	
+	<!-- 상영 정보 삭제 - 충돌 해결 전 작성됨 -->
+	<update id="removeRunInfo" parameterType="_int">
+		UPDATE PLAYING
+		SET STATUS = 'N'
+		WHERE PLAYING_NO = #{playingNo} 
+	</update>
+	
+	<!-- === 리뷰 관련 === -->
+	<!-- 리뷰 수 체크 -->
+	<select id="checkReviewCount" parameterType="_int" resultType="_int">
+		SELECT COUNT(*) FROM REVIEW
+		WHERE MOVIE_NO = #{movieNo} AND IS_DELETED = 'N'
+	</select>
+	
+	<!-- 리뷰 조회 (사용자, 관리자 공통) -->
+	<!-- 이것도 보안 문제로 관리자는 별도 메소드로 조회하나, 쿼리 자체는 동일함 -->
+	<select id="selectReview" parameterType="hashmap" resultMap="reviewResultSet">
+		SELECT * FROM (
+			SELECT ROWNUM RNUM, A.* FROM (
+				SELECT REVIEW_ID, 
+					USER_NO, SUBSTR(MEM.USER_ID,1,4) || '****' AS USER_ID,
+					REVIEW_TITLE, REVIEW_DATE,
+					SCORE, IS_WATCHED, REVIEW_CONTENT 
+				FROM REVIEW R JOIN MEMBER MEM USING (USER_NO)
+				WHERE MOVIE_NO = #{movieNo} AND IS_DELETED = 'N'
+			) A
+		) WHERE RNUM BETWEEN 10*(#{cpage}-1)+1 AND 10*#{cpage}
+	</select>
+	
+	<!-- 평점 조회 (사용자) -->
+	<select id="checkAverage" parameterType="_int" resultType="double">
+		SELECT ROUND(AVG(SCORE),2) FROM REVIEW
+		WHERE MOVIE_NO = #{movieNo} AND IS_DELETED = 'N'
+	</select>
+	<select id="checkEvalNo" parameterType="hashmap" resultType="double">
+		SELECT COUNT(*) FROM REVIEW
+		WHERE MOVIE_NO = #{movieNo} AND SCORE = #{score} AND IS_DELETED = 'N'
+	</select>
+	
+	<!-- 상단 미관 용도로 제목 조회 (관리자) -->
+	<select id="checkMovieTitle" parameterType="_int" resultMap="movieResultSet">
+		SELECT MOVIE_TITLE,MOVIE_NO FROM MOVIE
+		WHERE MOVIE_NO = #{movieNo}
+	</select>
+	
+	<!-- [사용자] 로그인된 유저가 조회 중인 영화에 리뷰를 남겼는지 확인 -->
+	<select id="checkUserReview" parameterType="_int" resultType="_int">
+		SELECT COUNT(*) FROM REVIEW
+		WHERE MOVIE_NO = #{movieNo} AND USER_NO = #{userNo}
+	</select>
+	
+	<!-- 리뷰 작성 (사용자) -->
+	<insert id="writeReview" parameterType="review">
+		INSERT INTO REVIEW(
+    		REVIEW_ID, USER_NO, MOVIE_NO, REVIEW_TITLE,
+    		REVIEW_DATE, SCORE, IS_WATCHED, REVIEW_CONTENT
+		) VALUES(
+    		SEQ_REV.NEXTVAL, #{userNo}, #{movieNo}, #{reviewTitle},
+    		SYSDATE, #{score}, #{isWatched}, #{reviewContent} )
+	</insert>
+	
+	<!-- 사용자가 적은 리뷰 확인 -->
+	<select id="checkRid" parameterType="_int" resultType="_int">
+		SELECT REVIEW_ID FROM REVIEW
+		WHERE MOVIE_NO = #{movieNo} AND USER_NO = #{userNo}
+	</select>
+	
+	<!-- 리뷰 수정 (사용자) -->
+	<update id="updateReview" parameterType="hashmap">
+		UPDATE REVIEW
+		SET SCORE = #{score},
+			REVIEW_CONTENT = #{reviewContent}
+		WHERE REVIEW_ID = #{reviewId} AND MOVIE_NO = #{movieNo} AND USER_NO = #{userNo}
+	</update>
+	
+	<!-- 리뷰 삭제 (사용자) -->
+	<update id="deleteReview" parameterType="hashmap">
+		UPDATE REVIEW
+		SET IS_DELETED = 'Y'
+		WHERE REVIEW_ID = #{reviewId} AND MOVIE_NO = #{movieNo} AND USER_NO = #{userNo}
+	</update>
+	
+	<!-- 리뷰 삭제 (관리자) -->
+	<update id="adminDeleteReview" parameterType="int">
+		UPDATE REVIEW
+		SET IS_DELETED = 'Y'
+		WHERE REVIEW_ID = #{reviewId}
+	</update>
+	
+
+</mapper>

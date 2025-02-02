@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="memberMapper">
+
+	<resultMap id="memberResultSet" type="member">
+		<id column="USER_NO" property="userNo" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_PWD" property="userPwd" />
+		<result column="USER_NAME" property="userName" />
+		<result column="EMAIL" property="email" />
+		<result column="BIRTH" property="birth" />
+		<result column="GENDER" property="gender" />
+		<result column="MARKETING" property="marketing" />
+		<result column="ENROLL_DATE" property="enrollDate" />
+		<result column="STATUS" property="status" />
+	</resultMap>
+	
+	<resultMap id="reserveResultSet" type="reserve">
+		<result column="MOVIE_NO" property="movieNo" />
+		<result column="MOVIE_TITLE" property="movieTitle" />
+	    <result column="RUNTIME" property="runtime" />
+	    <result column="BOOK_NO" property="bookNo" />
+	    <result column="BOOK_COST" property="bookCost" />
+	    <result column="BOOK_TOTAL_COST" property="bookTotalCost" />
+	    <result column="COST_PROCESS" property="costProcess" />
+	    <result column="TOTALTICKETS" property="totalTickets" />
+	    <result column="SCREEN_NAME" property="screenName" />
+	    <result column="SEATNO" property="seatNo" />
+	    <result column="PLAYTIME" property="playtime" />
+	    <result column="ENDTIME" property="endTime" />
+	    <result column="FILE_CODENAME" property="fileCodename" />
+	    <result column="IMAGE_PATH" property="imagePath" />
+	</resultMap>
+	
+	<resultMap id="cancelResultSet" type="reserve">
+	    <result column="MOVIE_TITLE" property="movieTitle" />
+	    <result column="PLAYTIME" property="playtime" />
+	    <result column="MODIFY_DATE" property="modifyDate" />
+	    <result column="BOOK_COST" property="bookCost" />
+	</resultMap>
+	
+	<resultMap id="useCouponResultSet" type="reserve">
+	    <result column="COUPON_NAME" property="couponName" />
+	    <result column="BOOK_NO" property="bookNo" />
+	</resultMap>
+	
+	<resultMap id="historyResultSet" type="history">
+		<result column="BOOK_NO" property="bookNo" />
+		<result column="MOVIE_NO" property="movieNo" />
+	    <result column="MOVIE_TITLE" property="movieTitle" />
+	    <result column="PLAYTIME" property="playtime" />
+	    <result column="SCREEN_NAME" property="screenName" />
+	    <result column="TOTALTICKETS" property="totalTickets" />
+	    <result column="FILE_CODENAME" property="fileCodename" />
+	    <result column="IMAGE_PATH" property="imagePath" />
+	</resultMap>
+	
+	<resultMap id="favoriteResultSet" type="favorite">
+		<result column="MOVIE_NO" property="movieNo" />
+	    <result column="MOVIE_TITLE" property="movieTitle" />
+	    <result column="OPEN_DATE" property="openDate" />
+	    <result column="FILE_CODENAME" property="fileCodename" />
+	    <result column="IMAGE_PATH" property="imagePath" />
+	</resultMap>
+	
+	<resultMap id="couponResultSet" type="myCoupon">
+		<result column="COUPON_NO" property="couponNo" />
+	    <result column="COUPON_NAME" property="couponName" />
+	    <result column="COUPON_EXP_DATE" property="couponExpDate" />
+	</resultMap>
+	
+	<resultMap id="reviewResultSet" type="myReview">
+		<result column="REVIEW_ID" property="reviewId" />
+	    <result column="USER_NO" property="userNo" />
+	    <result column="MOVIE_NO" property="movieNo" />
+	    <result column="REVIEW_TITLE" property="reviewTitle" />
+	    <result column="REVIEW_CONTENT" property="reviewContent" />
+	    <result column="REVIEW_DATE" property="reviewDate" />
+	    <result column="SCORE" property="score" />
+	    <result column="MOVIE_TITLE" property="movieTitle" />
+	    <result column="FILE_CODENAME" property="fileCodename" />
+	    <result column="IMAGE_PATH" property="imagePath" />
+	</resultMap>
+	
+	<select id="loginMember" 
+			parameterType="member"
+			resultMap="memberResultSet">
+		SELECT *
+		  FROM MEMBER
+		 WHERE USER_ID = #{userId}
+		   AND STATUS = 'Y'
+	</select>
+	
+	<insert id="insertMember" parameterType="member">
+		INSERT INTO MEMBER(USER_NO
+						 , USER_ID
+		                 , USER_PWD
+		                 , USER_NAME
+		                 , EMAIL
+		                 , BIRTH
+		                 , GENDER
+		                 , MARKETING)
+		            VALUES(SEQ_UNO.NEXTVAL
+		            	 , #{userId}
+		                 , #{userPwd}
+		                 , #{userName}
+		                 , #{email}
+		                 , #{birth}
+		                 , #{gender}
+		                 , #{marketing})
+	</insert>
+	
+	<select id="idCheck" parameterType="string" resultType="int">
+	    SELECT COUNT(*)
+	      FROM MEMBER
+	     WHERE USER_ID = #{userId}
+	</select>
+	
+	<select id="checkEmail" parameterType="string" resultType="int">
+	    SELECT COUNT(*)
+	      FROM MEMBER
+	     WHERE EMAIL = #{email}
+	       AND STATUS = 'Y'
+	</select>
+	
+	
+	<update id="changePwd" parameterType="member">
+	    UPDATE MEMBER
+	       SET USER_PWD = #{userPwd}
+	     WHERE USER_ID = #{userId}
+	       AND STATUS = 'Y'
+	</update>
+	
+	<update id="changeName" parameterType="member">
+	    UPDATE MEMBER
+	       SET USER_NAME = #{userName}
+	     WHERE USER_ID = #{userId}
+	       AND STATUS = 'Y'
+	</update>
+	
+	<update id="changeGender" parameterType="member">
+	    UPDATE MEMBER
+	       SET GENDER = #{gender}
+	     WHERE USER_ID = #{userId}
+	       AND STATUS = 'Y'
+	</update>
+	
+	<update id="changeBirth" parameterType="member">
+	    UPDATE MEMBER
+	       SET BIRTH = #{birth}
+	     WHERE USER_ID = #{userId}
+	       AND STATUS = 'Y'
+	</update>
+	
+	<update id="changeMarketing" parameterType="member">
+	    UPDATE MEMBER
+	       SET MARKETING = #{marketing}
+	     WHERE USER_ID = #{userId}
+	       AND STATUS = 'Y'
+	</update>
+	
+	<update id="withdrawMember" parameterType="member">
+		UPDATE MEMBER
+		   SET STATUS = 'N'
+		 WHERE USER_ID = #{userId}
+		   AND STATUS = 'Y'
+	</update>
+	
+	<select id="reserveList" parameterType="int" resultMap="reserveResultSet">
+		SELECT m.MOVIE_NO AS MOVIE_NO,
+		       m.MOVIE_TITLE AS MOVIE_TITLE,
+		       m.RUNTIME AS RUNTIME,
+		       b.BOOK_NO AS BOOK_NO,
+		       b.BOOK_COST AS BOOK_COST,
+		       b.BOOK_TOTAL_COST AS BOOK_TOTAL_COST,
+		       b.COST_PROCESS AS COST_PROCESS,
+		       COUNT(ss.SEAT_NO) AS TOTALTICKETS,
+		       s.SCREEN_NAME AS SCREEN_NAME,
+		       LISTAGG(ss.SEAT_NO, ',') WITHIN GROUP (ORDER BY ss.SEAT_NO) AS SEATNO,
+		       p.PLAYTIME AS PLAYTIME,
+		       p.PLAYTIME + (m.RUNTIME / 1440) AS ENDTIME,
+		       po.FILE_CODENAME AS FILE_CODENAME,
+		       po.IMAGE_PATH AS IMAGE_PATH
+		  FROM BOOKING b
+		  JOIN BOOKING_SEAT bs ON b.BOOK_NO = bs.BOOK_NO
+		  JOIN PLAYING p ON bs.PLAYING_NO = p.PLAYING_NO
+		  JOIN MOVIE m ON p.MOVIE_NO = m.MOVIE_NO
+		  JOIN SCREEN s ON p.SCREEN_NO = s.SCREEN_NO
+		  JOIN SCREEN_SEAT ss ON bs.SSEAT_NO = ss.SSEAT_NO
+		  LEFT JOIN POSTER po ON m.MOVIE_NO = po.MOVIE_NO
+		 WHERE b.STATUS = 'Y'
+		   AND b.USER_NO = #{userNo}
+		   AND po.FILE_LEVEL = '1'
+		   AND p.PLAYTIME >= ADD_MONTHS(SYSDATE, -1)
+		 GROUP BY m.MOVIE_NO, m.MOVIE_TITLE, m.RUNTIME, b.BOOK_NO, b.BOOK_COST, b.BOOK_TOTAL_COST, b.COST_PROCESS,
+		          s.SCREEN_NAME, p.PLAYTIME, (p.PLAYTIME + (m.RUNTIME / 1440)), po.FILE_CODENAME, po.IMAGE_PATH
+		 ORDER BY 
+		  CASE WHEN p.PLAYTIME + (m.RUNTIME / 1440) > SYSDATE 
+		       THEN 0
+		       ELSE 1
+		       END, p.PLAYTIME ASC
+	</select>
+	
+	<select id="cancelList" parameterType="int" resultMap="cancelResultSet">
+		SELECT m.MOVIE_TITLE AS MOVIE_TITLE,
+		       p.PLAYTIME AS PLAYTIME,
+		       b.MODIFY_DATE AS MODIFY_DATE,
+		       b.BOOK_COST AS BOOK_COST
+		  FROM BOOKING b
+		  JOIN PLAYING p ON b.BOOK_NO = p.PLAYING_NO
+		  JOIN MOVIE m ON p.MOVIE_NO = m.MOVIE_NO
+		 WHERE b.STATUS = 'N'
+		   AND b.USER_NO = #{userNo}
+		   AND p.PLAYTIME >= SYSDATE - 7
+		 ORDER BY b.MODIFY_DATE ASC
+	</select>
+	
+	<select id="useCouponList" parameterType="int" resultMap="useCouponResultSet">
+		SELECT c.COUPON_NAME AS COUPON_NAME,
+	           cu.BOOK_NO AS BOOK_NO
+	      FROM COUPON_USER cu
+	      JOIN COUPON c ON cu.COUPON_NO = c.COUPON_NO
+	      JOIN BOOKING b ON cu.BOOK_NO = b.BOOK_NO
+	     WHERE b.USER_NO = #{userNo}
+	       AND b.STATUS = 'Y'
+	       AND cu.COUPON_USE = 'O'
+	</select>
+	
+	<select id="historyList" parameterType="int" resultMap="historyResultSet">
+		SELECT b.BOOK_NO AS BOOK_NO,
+			   m.MOVIE_NO AS MOVIE_NO,
+		       m.MOVIE_TITLE AS MOVIE_TITLE,
+		       TO_CHAR(p.PLAYTIME, 'YYYY.MM.DD (DY) HH24:MI') || ' ~ ' 
+		       || TO_CHAR(p.PLAYTIME + (m.RUNTIME / 1440), 'HH24:MI') AS PLAYTIME,
+		       s.SCREEN_NAME AS SCREEN_NAME,
+		       COUNT(ss.SEAT_NO) AS TOTALTICKETS,
+		       po.FILE_CODENAME AS FILE_CODENAME,
+		       po.IMAGE_PATH AS IMAGE_PATH
+		  FROM BOOKING b
+		  JOIN BOOKING_SEAT bs ON b.BOOK_NO = bs.BOOK_NO
+		  JOIN PLAYING p ON bs.PLAYING_NO = p.PLAYING_NO
+		  JOIN MOVIE m ON p.MOVIE_NO = m.MOVIE_NO
+		  JOIN SCREEN s ON p.SCREEN_NO = s.SCREEN_NO
+		  JOIN SCREEN_SEAT ss ON bs.SSEAT_NO = ss.SSEAT_NO
+		  LEFT JOIN POSTER po ON m.MOVIE_NO = po.MOVIE_NO
+		 WHERE b.STATUS = 'Y'
+		   AND b.USER_NO = #{userNo}
+		   AND (p.PLAYTIME + (m.RUNTIME / 1440)) &lt; SYSDATE
+		   AND po.FILE_LEVEL = '1'
+		 GROUP BY b.BOOK_NO, m.MOVIE_NO, m.MOVIE_TITLE, p.PLAYTIME, s.SCREEN_NAME, 
+		          (p.PLAYTIME + (m.RUNTIME / 1440)), po.FILE_CODENAME, po.IMAGE_PATH
+		 ORDER BY p.PLAYTIME DESC
+	</select>
+	
+	<select id="historyListByYear" parameterType="map" resultMap="historyResultSet">
+	    SELECT b.BOOK_NO AS BOOK_NO,
+	    	   m.MOVIE_NO AS MOVIE_NO,
+	           m.MOVIE_TITLE AS MOVIE_TITLE,
+	           TO_CHAR(p.PLAYTIME, 'YYYY.MM.DD (DY) HH24:MI') || ' ~ ' 
+	           || TO_CHAR(p.PLAYTIME + (m.RUNTIME / 1440), 'HH24:MI') AS PLAYTIME,
+	           s.SCREEN_NAME AS SCREEN_NAME,
+	           COUNT(ss.SEAT_NO) AS TOTALTICKETS,
+	           po.FILE_CODENAME AS FILE_CODENAME,
+	           po.IMAGE_PATH AS IMAGE_PATH
+	      FROM BOOKING b
+	      JOIN BOOKING_SEAT bs ON b.BOOK_NO = bs.BOOK_NO
+	      JOIN PLAYING p ON bs.PLAYING_NO = p.PLAYING_NO
+	      JOIN MOVIE m ON p.MOVIE_NO = m.MOVIE_NO
+	      JOIN SCREEN s ON p.SCREEN_NO = s.SCREEN_NO
+	      JOIN SCREEN_SEAT ss ON bs.SSEAT_NO = ss.SSEAT_NO
+	      LEFT JOIN POSTER po ON m.MOVIE_NO = po.MOVIE_NO
+	     WHERE b.STATUS = 'Y'
+	       AND b.USER_NO = #{userNo}
+	       AND (p.PLAYTIME + (m.RUNTIME / 1440)) &lt; SYSDATE
+	       AND po.FILE_LEVEL = '1'
+	       AND TO_CHAR(p.PLAYTIME, 'YYYY') = #{year}
+	     GROUP BY b.BOOK_NO, m.MOVIE_NO, m.MOVIE_TITLE, p.PLAYTIME, s.SCREEN_NAME, 
+	              (p.PLAYTIME + (m.RUNTIME / 1440)), po.FILE_CODENAME, po.IMAGE_PATH
+	     ORDER BY p.PLAYTIME DESC
+	</select>
+	
+	<select id="findUserId" parameterType="map" resultType="string">
+	    SELECT USER_ID
+	      FROM MEMBER
+	     WHERE USER_NAME = #{userName}
+	       AND BIRTH = #{birth}
+	       AND EMAIL = #{email}
+	       AND STATUS = 'Y'
+	</select>
+	
+	<select id="findUserPwd" parameterType="map" resultType="string">
+	    SELECT USER_PWD
+	      FROM MEMBER
+	     WHERE USER_NAME = #{userName}
+	       AND USER_ID = #{userId}
+	       AND BIRTH = #{birth}
+	       AND EMAIL = #{email}
+	       AND STATUS = 'Y'
+	</select>
+	
+	<update id="updateUserPwd" parameterType="map">
+	    UPDATE MEMBER
+	       SET USER_PWD = #{encryptedPwd}
+	     WHERE USER_ID = #{userId}
+	</update>
+	
+	<select id="favoriteList" parameterType="map" resultMap="favoriteResultSet">
+	    SELECT m.MOVIE_NO AS MOVIE_NO,
+	           m.MOVIE_TITLE AS MOVIE_TITLE,
+	           TO_CHAR(m.OPEN_DATE, 'YYYY.MM.DD') AS OPEN_DATE,
+	           m.PREMIERE AS PREMIERE,
+	           p.FILE_CODENAME AS FILE_CODENAME,
+	           p.IMAGE_PATH AS IMAGE_PATH
+	      FROM FAVORITE f
+	      JOIN MOVIE m ON f.MOVIE_NO = m.MOVIE_NO
+	      LEFT JOIN POSTER p ON m.MOVIE_NO = p.MOVIE_NO
+	     WHERE f.USER_NO = #{userNo}
+	       AND p.FILE_LEVEL = '1'
+	     ORDER BY m.OPEN_DATE
+	       <if test="sort == 'desc'">
+	           DESC
+	       </if>
+	</select>
+	
+	<delete id="deleteFavorite" parameterType="map">
+	    DELETE FROM FAVORITE
+	    WHERE USER_NO = #{userNo}
+	      AND MOVIE_NO = #{movieNo}
+	</delete>
+	
+	<delete id="deleteHistorySeat">
+	    DELETE FROM BOOKING_SEAT
+	     WHERE BOOK_NO = #{bookNo}
+	</delete>
+	
+	<delete id="deleteHistory">
+	    DELETE FROM BOOKING
+	     WHERE USER_NO = #{userNo}
+	       AND BOOK_NO = #{bookNo}
+	</delete>
+	
+	<select id="couponList" parameterType="int" resultMap="couponResultSet">
+		SELECT CU.COUPON_NO AS COUPON_NO,
+		       C.COUPON_NAME AS COUPON_NAME,
+		       TO_CHAR(C.COUPON_EXP_DATE, 'YY/MM/DD HH24:MI:SS') AS COUPON_EXP_DATE
+		  FROM COUPON_USER CU
+		  JOIN COUPON C ON CU.COUPON_NO = C.COUPON_NO
+		 WHERE CU.USER_NO = #{userNo}
+		   AND CU.COUPON_USE = 'X'
+		   AND C.COUPON_STATUS = 'Y'
+		 ORDER BY C.COUPON_EXP_DATE ASC
+	</select>
+	
+	<select id="reviewList" parameterType="int" resultMap="reviewResultSet">
+		SELECT R.REVIEW_ID AS REVIEW_ID,
+		       R.USER_NO AS USER_NO,
+		       R.MOVIE_NO AS MOVIE_NO,
+		       R.REVIEW_TITLE AS REVIEW_TITLE,
+		       R.REVIEW_CONTENT AS REVIEW_CONTENT,
+		       R.REVIEW_DATE AS REVIEW_DATE,
+		       R.SCORE AS SCORE,
+		       M.MOVIE_TITLE AS MOVIE_TITLE,
+		       P.FILE_CODENAME AS FILE_CODENAME,
+		       P.IMAGE_PATH AS IMAGE_PATH
+		  FROM REVIEW R
+		  JOIN MOVIE M ON R.MOVIE_NO = M.MOVIE_NO
+		  LEFT JOIN POSTER P ON M.MOVIE_NO = P.MOVIE_NO
+		 WHERE R.IS_DELETED = 'N'
+		   AND R.USER_NO = #{userNo}
+		   AND P.FILE_LEVEL = '1'
+		 ORDER BY R.REVIEW_DATE DESC
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 관리자 -->
+	<select id="selectListCount" resultType="int">
+		SELECT COUNT(*)
+		  FROM MEMBER
+	</select>
+	
+	<select id="memberList" resultMap="memberResultSet">
+		SELECT USER_NO,
+		       USER_ID,
+		       USER_NAME,
+		       BIRTH,
+		       EMAIL,
+		       GENDER,
+		       STATUS,
+		       TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') AS ENROLL_DATE
+		  FROM MEMBER
+		 ORDER BY USER_NO DESC
+	</select>
+	
+	<select id="selectSearchListCount" resultType="int">
+	    SELECT COUNT(*)
+	      FROM MEMBER
+	     WHERE USER_ID LIKE '%' || #{keyword} || '%'
+	</select>
+	
+	<select id="searchMemberList" resultMap="memberResultSet">
+	    SELECT USER_NO,
+		       USER_ID,
+		       USER_NAME,
+		       BIRTH,
+		       EMAIL,
+		       GENDER,
+		       STATUS,
+		       TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') AS ENROLL_DATE
+	      FROM MEMBER
+	     WHERE USER_ID LIKE '%' || #{keyword} || '%'
+	     ORDER BY USER_NO DESC
+	</select>
+	
+	<select id="selectStatusListCount" parameterType="string" resultType="int">
+	    SELECT COUNT(*)
+	    FROM MEMBER
+	    WHERE STATUS = #{status}
+	</select>
+	
+	<select id="selectStatusMemberList" parameterType="string" resultMap="memberResultSet">
+	    SELECT USER_NO,
+		       USER_ID,
+		       USER_NAME,
+		       BIRTH,
+		       EMAIL,
+		       GENDER,
+		       STATUS,
+		       TO_CHAR(ENROLL_DATE, 'YYYY-MM-DD') AS ENROLL_DATE
+	    FROM MEMBER
+	    WHERE STATUS = #{status}
+	    ORDER BY USER_NO DESC
+	</select>
+	
+	<update id="updateMemberStatus">
+	    UPDATE MEMBER
+	    SET STATUS = #{status}
+	    WHERE USER_NO = #{userNo}
+	</update>
+	
+	
+
+	
+	
+	
+	
+	<!-- 결제페이지(형문) -->
+	<select id="selectMember" parameterType="int" resultType="member">
+		SELECT *
+		  FROM MEMBER
+		 WHERE USER_NO = #{userNo}
+	</select>
+</mapper>

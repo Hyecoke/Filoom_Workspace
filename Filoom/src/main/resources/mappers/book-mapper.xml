@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="bookMapper">
+
+
+	
+	<resultMap id="bookingResultSet" type="booking">
+		<id column="BOOK_NO" property="bookNo"/>
+		<result column="USER_NO" property="userNo"/>
+		<result column="BOOK_DATE" property="bookDate"/>
+		<result column="BOOK_TOTAL_COST" property="bookTotalCost"/>
+		<result column="BOOK_COST" property="bookCost"/>
+		<result column="COST_PROCESS" property="costProcess"/>
+		<result column="COST_TID" property="costTid"/>
+		<result column="STATUS" property="status"/>
+		<result column="MODIFY_DATE" property="modifyDate"/>
+		
+		<!-- 추가:관리자(예매내역)-->
+		<result column="USER_ID" property="userId"/>
+		<result column="USER_NAME" property="userName"/>
+		<result column="PLAYTIME" property="playTime"/>
+	</resultMap>
+	
+	<resultMap id = "playingResultSet" type="playing">
+		<id column="PLAYING_NO" property="playingNo"/>
+		<result column="PLAYTIME" property="playTime"/>
+		<result column="STATUS" property="status"/>
+		<result column="MOVIE_NO" property="movieNo"/>
+		<result column="SCREEN_NO" property="screenNo"/>
+	</resultMap>
+	
+	<resultMap id = "screenResultSet" type="screen">
+		<id column="SCREEN_NO" property="screenNo"/>
+		<result column="SCREEN_NAME" property="screenName"/>
+		<result column="SCREEN_CAPACITY" property="screenCapacity"/>
+		<result column="SCREEN_INFO" property="screenInfo"/>
+	</resultMap>
+	
+	<resultMap id = "seatResultSet" type="seat">
+		<id column="SEAT_NO" property="seatNo"/>
+		<result column="PLATING_NO" property="playingNo"/>
+		<result column="SSEAT_NO" property="sseatNo"/>		
+	</resultMap>
+
+	
+	<resultMap id = "screenSeatResultSet" type="screenseat">
+		<id column="SSEAT_NO" property="sseatNo"/>
+		<result column="SEAT_NO" property="seatNo"/>
+		<result column="SCREEN_NO" property="screenNo"/>		
+	</resultMap>
+	
+	<resultMap id = "bookingSeatResultSet" type="bookingseat">
+		<id column="BOOKING_SEAT_NO" property="bookingSeatNo"/>
+		<result column="TIMELIMIT" property="timeLimit"/>	
+		<result column="SSEAT_NO" property="sseatNo"/>
+		<result column="PLAYING_NO" property="playingNo"/>
+		<result column="BOOK_NO" property="bookNo"/>
+		
+		<!-- 좌석번호 -->
+		<result column="SEAT_NO" property="seatNo"/> 
+		
+	</resultMap>
+	
+	<resultMap id = "selectMovieDateDetail" type="playing">
+		<id column="PLAYING_NO" property="playingNo"/>
+		<result column="PLAYTIME" property="playTime"/>
+		<result column="STATUS" property="status"/>
+		<result column="MOVIE_NO" property="movieNo"/>
+		<result column="MOVIE_TITLE" property="movieTitle"/>
+		<result column="SCREEN_NO" property="screenNo"/>
+		<result column="RUNTIME" property="runtime"/>
+		<result column="SCREEN_CAPACITY" property="screenCapacity"/>
+		<result column="OCCUPIED_SEATS" property="occupiedSeats"/>
+	</resultMap>
+	
+	<resultMap id="selectMovieSeat" type="playing">
+		<id column="PLAYING_NO" property="playingNo"/>
+		<result column="PLAYTIME" property="playTime"/>
+		<result column="SCREEN_NO" property="screenNo"/>
+		<result column="SCREEN_NAME" property="screenName"/>
+		<result column="SSEAT_NO" property="sseatNo"/>
+		<result column="TIMELIMIT" property="timeLimit"/>
+		<result column="SEAT_NO" property="seatNo"/>
+		<result column="MOVIE_TITLE" property="movieTitle"/>
+		<result column="RUNTIME" property="runtime"/>
+
+	</resultMap>
+	
+	<resultMap id = "insertBookingSeat" type="bookingseat">
+		<id column="BOOKING_SEAT_NO" property="bookingSeatNo"/>
+		<result column="PLAYING_NO" property="playingNo"/>
+		<result column="TIME_LIMIT" property="timeLimit"/>
+		<result column="SEAT_NO" property="seatNo"/>
+	</resultMap>
+	
+	<resultMap id = "deleteBookingListList" type="bookingseat">
+		<id column="PLAYING_NO" property="playingNo"/>
+		<result column="SEAT_NO" property="seatNo"/>
+	
+	</resultMap>
+	
+	<select id = "selectMovieDate" parameterType="_int" resultMap="selectMovieDateDetail">
+		SELECT 
+		    P.PLAYING_NO,
+		    P.PLAYTIME,
+		    P.STATUS,
+		    P.MOVIE_NO,
+		    S.SCREEN_NO,
+		    M.RUNTIME,
+		    M.MOVIE_TITLE,
+		    S.SCREEN_CAPACITY,
+		    (SELECT COUNT(*) 
+		     FROM BOOKING_SEAT 
+		     WHERE PLAYING_NO = P.PLAYING_NO 
+		       AND TIMELIMIT &gt; SYSDATE) AS OCCUPIED_SEATS
+		FROM 
+		    PLAYING P
+		JOIN
+		    MOVIE M
+		ON
+		    P.MOVIE_NO = M.MOVIE_NO
+		JOIN
+		    SCREEN S
+		ON
+		    P.SCREEN_NO = S.SCREEN_NO
+		WHERE 
+		    P.STATUS = 'Y'
+		    AND P.MOVIE_NO = #{movieNo}
+		    AND P.PLAYTIME &gt; SYSDATE
+	</select>
+	
+	<select id = "selectMovieSeat" parameterType="_int" resultMap="selectMovieSeat">
+		SELECT 
+		    P.PLAYING_NO,
+		    P.PLAYTIME,
+		    P.SCREEN_NO,
+		    S.SCREEN_NAME,
+		    BS.SSEAT_NO,
+		    BS.TIMELIMIT,
+		    CASE 
+		        WHEN BS.TIMELIMIT > SYSDATE THEN SS.SEAT_NO
+		        ELSE NULL
+		    END AS SEAT_NO,
+		    M.MOVIE_TITLE,
+		    M.RUNTIME
+		FROM 
+		    PLAYING P
+		JOIN 
+		    SCREEN S
+		ON 
+		    P.SCREEN_NO = S.SCREEN_NO
+		LEFT JOIN 
+		    BOOKING_SEAT BS
+		ON 
+		    P.PLAYING_NO = BS.PLAYING_NO
+		LEFT JOIN 
+		    SCREEN_SEAT SS
+		ON 
+		    BS.SSEAT_NO = SS.SSEAT_NO
+		JOIN 
+		    MOVIE M
+		ON 
+		    P.MOVIE_NO = M.MOVIE_NO
+		WHERE  
+		    P.PLAYING_NO =  #{playingNo}
+	</select>
+	
+	<select id="isSeatAlreadyBooked" parameterType="map" resultType="int">
+	    SELECT COUNT(*)
+		FROM BOOKING_SEAT BS
+		JOIN SCREEN_SEAT SS
+		  ON BS.SSEAT_NO = SS.SSEAT_NO
+		WHERE BS.PLAYING_NO = #{playingNo}
+	      AND SS.SEAT_NO = #{seatId}
+	</select>
+	
+	<insert id = "insertBookingSeat" parameterType="bookingseat">
+		INSERT INTO BOOKING_SEAT (
+		    BOOKING_SEAT_NO,
+		    TIMELIMIT,
+		    SSEAT_NO,
+		    PLAYING_NO,
+		    BOOK_NO
+		)
+		VALUES (
+		    SEQ_BSNO.NEXTVAL, 
+		    TO_TIMESTAMP(#{timeLimit}, 'YYYY-MM-DD HH24:MI:SS.FF'),
+		    (SELECT SSEAT_NO
+		     FROM SCREEN_SEAT
+		     WHERE SEAT_NO = #{seatId} 
+		     AND SCREEN_NO = (
+		         SELECT SCREEN_NO 
+		         FROM PLAYING
+		         WHERE PLAYING_NO = #{playingNo}
+		     )
+		    ),
+		    #{playingNo}, 
+		    NULL 
+		)
+	
+	</insert>
+	
+	<delete id = "deleteBookingSeat" parameterType="bookingseat">
+		DELETE FROM BOOKING_SEAT
+		WHERE PLAYING_NO = #{playingNo}
+		  AND SSEAT_NO = (
+		      SELECT SSEAT_NO
+		      FROM SCREEN_SEAT
+		      WHERE SEAT_NO = #{seatNo}
+		        AND SCREEN_NO = (
+		            SELECT SCREEN_NO
+		            FROM PLAYING
+		            WHERE PLAYING_NO = #{playingNo}
+		        )
+		  )
+	</delete>
+	
+	
+	<delete id="deleteBookingListList" parameterType="list">
+	    DELETE FROM BOOKING_SEAT
+	    WHERE PLAYING_NO = #{list[0].playingNo}
+	      AND SSEAT_NO IN (
+	          <foreach collection="list" item="seat" separator="," open="" close="">
+	              (SELECT SSEAT_NO
+	               FROM SCREEN_SEAT
+	               WHERE SEAT_NO = #{seat.seatNo}
+	                 AND SCREEN_NO = (
+	                     SELECT SCREEN_NO
+	                     FROM PLAYING
+	                     WHERE PLAYING_NO = #{seat.playingNo}
+	                 ))
+	          </foreach>
+	      )
+	</delete>
+	 
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!-- 결제 -->
+	
+	<select id="checkAndGetBookingSeatNoList" parameterType="map" resultMap="bookingSeatResultSet">
+ 		SELECT BOOKING_SEAT_NO,
+ 			   TO_CHAR(TIMELIMIT, 'YYYY-MM-DD HH24:MI:SS') AS TIMELIMIT,
+ 			   SEAT_NO
+		  FROM BOOKING_SEAT BS
+		  JOIN SCREEN_SEAT SS ON (BS.SSEAT_NO  = SS.SSEAT_NO)
+		  JOIN PLAYING P ON (BS.PLAYING_NO = P.PLAYING_NO)
+		 WHERE BS.BOOK_NO IS NULL
+		   AND BS.PLAYING_NO = #{playingNo}
+		   <choose>
+		   		<when test="seatNos != null" >
+				   AND
+				   	<foreach item="item" collection="seatNos" open="SEAT_NO IN (" separator="," close=")">
+				   		#{item}
+				   	</foreach>
+		   		</when>
+		   		<when test="bookingSeatNos != null">
+		   			And
+		   			<foreach item="item" collection="bookingSeatNos" open="BOOKING_SEAT_NO IN (" separator="," close=")">
+				   		#{item}
+				   	</foreach>
+		   		</when>
+		   </choose>
+		   
+	</select>
+	
+
+	<!-- 데이터 삭제  -->
+	<delete id="deleteBookNo" parameterType="map">
+		DELETE FROM BOOKING
+		  WHERE USER_NO = #{userNo}
+		    AND BOOK_NO = #{bookNo}	
+	</delete>
+	
+	<!--  
+ 	<insert id="insertBookingSeats" parameterType="map">
+		INSERT INTO BOOKING_SEAT VALUES
+		           (SEQ_BSNO.NEXTVAL,
+		            SYSDATE+INTERVAL '5' MINUTE,
+		            (SELECT SSEAT_NO
+		               FROM SCREEN_SEAT
+		              WHERE SEAT_NO = #{seatNo}
+		                AND SCREEN_NO = (SELECT SCREEN_NO 
+		                                    FROM PLAYING
+		                                   WHERE PLAYING_NO = #{playingNo})
+					 ),
+		            #{playingNo},
+		            NULL)
+	</insert>
+	-->
+	
+	<update id="updateBookingSeatDone" parameterType="map">
+		UPDATE BOOKING_SEAT
+		   SET TIMELIMIT = '2999-01-01',
+		       BOOK_NO = #{bookNo}
+	    WHERE							  
+			 <foreach item="item" collection="bookingSeatNoList" open="BOOKING_SEAT_NO IN (" separator="," close=")"> 
+			 	#{item.bookingSeatNo}
+		 	</foreach>
+	</update>
+	
+	
+	
+
+	
+	<delete id="deleteBookingSeats" parameterType="list">
+		DELETE FROM BOOKING_SEAT
+		 WHERE 
+		 <foreach item="item" collection="list" open="BOOKING_SEAT_NO IN (" separator="," close=")">
+		 	#{item}
+		 </foreach>
+	</delete>
+	
+	<delete id="deleteBooking" parameterType="map">
+		DELETE FROM BOOKING
+		 WHERE BOOK_NO = #{bookNo}
+		   AND USER_NO = #{userNo}
+	</delete>
+	
+	<update id="cancelUpdateBooking" parameterType="map">
+		UPDATE BOOKING
+		   SET STATUS ='N',
+		       MODIFY_DATE=SYSDATE
+		 WHERE BOOK_NO=#{bookNo}
+		   AND USER_NO=#{userNo}
+	</update>
+	
+	<select id="checkCancelBooking" parameterType="map" resultType="int">
+		SELECT COUNT(B.BOOK_NO)
+		  FROM BOOKING B
+		  JOIN BOOKING_SEAT BS ON (B.BOOK_NO = BS.BOOK_NO)
+		  JOIN PLAYING P ON (BS.PLAYING_NO = P.PLAYING_NO)
+		 WHERE B.BOOK_NO = #{bookNo}
+		   AND PLAYTIME > SYSDATE
+		   AND USER_NO = #{userNo}
+		   AND B.STATUS = 'Y'
+		   AND MODIFY_DATE IS NULL
+	</select>
+	
+	<delete id="cancelupdateBookingSeat" parameterType="int">
+		DELETE FROM BOOKING_SEAT
+	 	 WHERE BOOK_NO = #{bookNo}
+	</delete>
+			
+	<insert id="insertSelectBooking" parameterType="booking">
+	    <selectKey keyProperty="bookNo" resultType="int" order="BEFORE">
+	        SELECT SEQ_BNO.NEXTVAL FROM DUAL
+	    </selectKey>
+	    INSERT INTO BOOKING (BOOK_NO,
+	                         BOOK_TOTAL_COST,
+	                         BOOK_COST,
+	                         COST_PROCESS,
+	                         COST_TID,
+	                         STATUS,
+	                         USER_NO)
+	    VALUES (#{bookNo},
+	            #{bookTotalCost},
+	            #{bookCost},
+	            #{costProcess},
+	            #{costTid},
+	            'Y',
+	            #{userNo})
+	</insert>
+	
+	<select id="selectBooking" parameterType="int" resultMap="bookingResultSet">
+		SELECT *
+		  FROM BOOKING
+		 WHERE BOOK_NO = #{bookNo}
+	</select>
+	
+	<select id="selectBookingSeatList" parameterType="list" resultMap="bookingSeatResultSet">
+		SELECT BOOKING_SEAT_NO,
+ 			   SEAT_NO
+		  FROM BOOKING_SEAT BS
+		  JOIN SCREEN_SEAT SS ON (BS.SSEAT_NO  = SS.SSEAT_NO)
+		 <where>
+		 	<foreach item="item" collection="list" open="BOOKING_SEAT_NO IN (" separator="," close=")">
+		 		#{item}
+		 	</foreach>
+		 </where>
+	</select>
+	
+	
+	<!-- 관리자 -->
+	
+	
+		<select id="selectBookingCount" parameterType="map" resultType="int">
+		SELECT COUNT(BOOK_NO)
+		  FROM BOOKING B
+		  JOIN MEMBER M ON (B.USER_NO = M.USER_NO)
+		  
+		  <where>
+		  	<if test="bookNo != ''">
+		  		AND BOOK_NO = #{bookNo}
+		  	</if>
+
+		  	<if test="userId != ''">
+		  		AND USER_ID = #{userId}
+		  	</if>
+		  
+		  </where>
+		  
+		</select>
+		
+		<select id="selectBookingListAdmin" parameterType="map" resultMap="bookingResultSet">
+			SELECT * 
+			FROM ( SELECT ROWNUM AS RNUM,SB.*
+			         FROM ( SELECT B.*, USER_NAME, USER_ID, PLAYTIME
+			                  FROM BOOKING B
+			                  LEFT JOIN MEMBER M ON (B.USER_NO = M.USER_NO)
+			                  LEFT JOIN BOOKING_SEAT BS ON (B.BOOK_NO = BS.BOOK_NO)
+			                  LEFT JOIN PLAYING P ON (BS.PLAYING_NO = P.PLAYING_NO)
+			                  <where>
+							  	<if test="bookNo != ''">
+							  		B.BOOK_NO = #{bookNo}
+							  	</if>
+							  	<if test="userId != ''">
+							  		AND USER_ID = #{userId}
+							  	</if>
+							  </where>
+			                  		ORDER BY B.BOOK_NO ${sorting}      
+	                  ) SB 
+             )
+			 WHERE RNUM > #{startNum}
+			 AND #{endNum} >= RNUM
+		</select>
+
+		
+</mapper>
+
+
+
+
+

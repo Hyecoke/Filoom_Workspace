@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+
+	
+	<bean class="org.apache.commons.dbcp2.BasicDataSource" 
+		  id="dataSource" destroy-method="close">
+		<!-- 어느 DB 에 접속할건지 필드 정보로써 나열 -->
+		<property name="driverClassName" 
+				  value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+		<property name="username" value="FILOOM" />
+		<property name="password" value="FILOOM" />
+	</bean>
+	
+
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean"
+		  id="sqlSessionFactory">
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		
+		<property name="dataSource" ref="dataSource" />
+	
+	</bean>
+	
+	
+
+	<bean class="org.mybatis.spring.SqlSessionTemplate"
+		  id="sqlSession">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>	
+	
+
+	<bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" 
+		  id="transactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>	
+		
+	<!-- @Transactional 어노테이션 활성화 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	
+	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver"
+		  id="multipartResolver">
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="maxUploadSize" value="10000000" />
+	</bean>
+	
+	<!-- 이메일 전송 관련 빈 등록 -->
+	<bean class="org.springframework.mail.javamail.JavaMailSenderImpl" 
+		  id="mailSender">
+		<!-- gmail 서버를 이용하겠다. -->
+		<property name="host" value="smtp.gmail.com" />
+		<!-- smtp 는 보통 25 번 포트번호를 씀 -->
+		<property name="port" value="25" />
+		<property name="username" value="backlightfiloom@gmail.com" />
+		<!-- 2차 앱 비밀번호 발급받은 것을 공백없이 쓴다. -->
+		<property name="password" value="dakycriaifndfhgl" />
+		
+		<!-- email 전송 시 필요한 SMTP 규칙에 대한 설정 지정 -->
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.transport.protocol">smtp</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+			</props>
+		</property>
+	</bean>
+		
+</beans>
+
+
+
+
+

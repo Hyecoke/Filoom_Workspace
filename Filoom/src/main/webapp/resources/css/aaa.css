@@ -1,0 +1,296 @@
+body{
+    background-color: black;
+    box-sizing: border-box;
+}
+
+#third_page{
+
+    width: 1920px;
+    height: 900px;
+    box-sizing: border-box;
+    
+    margin: auto;
+
+}
+
+#contents{
+    
+    width: 70%;
+    height: 100%;
+    float: left;
+}
+
+#contents2{
+    /*background-color: #151515;*/
+    height: 100%;
+    width: 30%;
+    float: left;
+}   
+
+/*  좌측 구상   */
+
+#flow{
+
+    width: 100%;
+    height: 15%;
+    text-align: center;
+    vertical-align: bottom;
+    display: flex;
+    letter-spacing : 0.15em;
+    
+}
+
+#movieSelect{
+
+    height: 100%;
+    width: 33%;
+    float: left;
+    vertical-align: bottom;
+    font-size: 40px;
+    border: solid #493628;
+    border-width: 0px 0px 6px 0px ;
+    
+}
+
+
+#seatSelect{
+
+    height: 100%;
+    width: 33%;
+    float: left;
+    font-size: 40px;
+    border: solid #A39083;
+    border-width: 0px 0px 8px 0px ;
+
+}
+
+
+#seat_2 {
+    position: relative;
+    background-color: #313131;
+    width: 100%;
+    height: 85%;
+    display: none;
+}
+
+#seat1 {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: auto;
+    width: 95%;
+    height: 93%;
+    background-color: #D9D9D9;
+}
+
+#screen {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    transform: translate(-50%, -50%);
+    margin: auto;
+    width: 60%;
+    height: 10%;
+    background-color: gray;
+}
+
+#real_seat {
+    margin: auto;
+    margin-top: 12%;
+    width: 90%;
+    height: 80%;
+    /*background-color: gray;*/
+    display: flex;
+    justify-content: space-between;
+}
+
+#left_seat, #middle_seat, #right_seat {
+    background-color: gray;
+    position: relative;
+    box-shadow: 0 0 0 15px #D9D9D9 inset;
+    height: 80%;
+}
+
+#left_seat {
+    width: 25%;
+}
+
+#middle_seat {
+    width: 50%;
+}
+
+#right_seat {
+    width: 25%;
+}
+
+#left_seat > table,
+#middle_seat > table,
+#right_seat > table {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+td {
+    text-align: center;
+}
+
+
+button {
+    width: 44px;
+    height: 64px;
+    margin: 2px;
+    background-color: #D9D9D9;
+    border: none;
+    cursor: pointer;
+}
+
+button.reserved {
+    background-color: black;
+    cursor: not-allowed;
+}
+
+button.selected {
+    background-color: #493628;
+}
+
+/*   우측 구상   */
+
+#detail_2{
+
+    /*background-color: navajowhite;*/
+    margin-top: 30px;
+    width: 100%;
+    height: 80%;
+    position: relative;
+    display: none;
+
+}
+
+#detail_content{
+
+    background-color: #313131;
+    width: 85%;
+    height: 60%;
+    position: absolute; 
+    left: 50%; 
+    top: 50%; 
+    transform: translate(-50%, -50%);
+    
+}
+
+#movieTitle, #movieDate, #movieSeat{
+    margin-top: 35px;
+    margin-left: 15px;
+    width: 450px;
+    height: 60px;
+    background-color: #151515;
+    border: none;
+    color: #E4E0E1;
+    font-size: 35px;
+}
+
+#buttonArea_2{
+
+    /*background-color: blueviolet;*/
+    width: 100%;
+    height: 20%;
+    margin: auto;
+    text-align: center;
+    position: relative;
+    display: none;
+}
+
+#booking_2{
+
+    margin-top: 15px;
+    width : 470px;
+    height: 70px;
+    background-color: #313131;
+    color:#E4E0E1;
+    font-size: 40px;
+    font-weight: 400;
+    border-radius: 5px;
+    border: none;
+    
+
+}
+
+.active {
+    display: block;
+}
+
+
+#past2{
+
+    margin-top: 10px;
+    width : 470px;
+    height: 70px;
+    background-color: #D9D9D9;
+    color:#313131;
+    font-size: 40px;
+    font-weight: 400;
+    border-radius: 5px;
+    border: none;
+
+}
+
+#past3{
+
+    margin-top: 10px;
+    width : 470px;
+    height: 70px;
+    background-color: #D9D9D9;
+    color:#313131;
+    font-size: 40px;
+    font-weight: 400;
+    border-radius: 5px;
+    border: none;
+
+}
+
+#booking_2:hover{
+    
+    color: #151515;
+    transform: scale(0.97); 
+    background-color: #696969;
+
+}
+
+#past2:hover{
+
+    color:#D9D9D9;
+    transform: scale(0.97); 
+    background-color: #696969;
+
+}
+#past3:hover{
+
+    color:#D9D9D9;
+    transform: scale(0.97); 
+    background-color: #696969;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

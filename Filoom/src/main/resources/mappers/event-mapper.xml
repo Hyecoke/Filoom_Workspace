@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="eventMapper">
+
+<!-- Event 테이블로부터 조회된 ResultSet을 Event VO 타입으로 옮겨주는 ResultMap -->
+<resultMap id="eventResultSet" type="event">
+	<id column="EVENT_NO" property="eventNo" />
+	<result column="EVENT_TITLE" property="eventTitle" />
+	<result column="EVENT_CONTENT" property="eventContent" />
+	<result column="START_DATE" property="startDate" />
+	<result column="END_DATE" property="endDate" />
+	<result column="CONTENTIMG1" property="contentImg1" />
+	<result column="EVENT_STATUS" property="eventStatus" />
+	<result column="STATUS" property="status" />
+	<result column="EVENT_TYPE" property="eventType" />
+</resultMap>
+
+
+<!-- Reply 테이블로부터 조회된 ResultSet을 Reply VO 타입으로 옮겨주는 ResultMap -->
+<resultMap id="replyResultSet" type="reply">
+	<id column="REPLY_NO" property="replyNo" />
+	<result column="REF_ENO" property="refEno" />
+	<result column="REPLY_CONTENT" property="replyContent" />
+	<result column="REPLY_WRITER" property="replyWriter" />
+	<result column="CREATE_DATE" property="createDate" />
+	<result column="STATUS" property="status" />
+	<result column="DRAWING_STATUS" property="drawingStatus" />
+</resultMap>
+
+<!-- EventAttachment 테이블로부터 조회된 ResultSet을 EventAttachment VO 타입으로 옮겨주는 ResultMap -->
+<resultMap id="eventAttachmentResultSet" type="eventAttachment">
+	<id column="EVNET_FILE_NO" property="eventFileNo" />
+	<result column="REF_ENO" property="refEno" />
+	<result column="ORIGIN_NAME" property="originName" />
+	<result column="CHANGE_NAME" property="changeName" />
+	<result column="FILE_PATH" property="filePath" />
+	<result column="FILE_LEVEL" property="fileLevel" />
+</resultMap>
+
+<!-- Applicant 테이블로부터 조회된 ResultSet을 Applicant VO 타입으로 옮겨주는 ResultMap -->
+<resultMap id="applicantResultSet" type="applicant">
+	<id column="APPLICANT_NO" property="applicantNo" />
+	<result column="REF_ENO" property="refEno" />
+	<result column="USER_NO" property="userNo" />
+	<result column="APPLICATION_DATE" property="applicationDate" />
+	<result column="DRAWING_STATUS" property="drawingStatus" />
+	<result column="EVENT_NO" property="eventNo" />
+	<result column="BOOK_NO" property="bookNo" />
+	<result column="COUPON_NO" property="couponNo" />
+	<result column="COUPON_USE" property="couponUser" />
+	<result column="EVENT_TITLE" property="eventTitle" />
+	<result column="COUPON_EXP_DATE" property="couponExpDate" />
+	<result column="USER_ID" property="userId" />
+</resultMap>
+
+<!-- coupon 테이블로부터 조회된 ResultSet을 Coupon VO 타입으로 옮겨주는 ResultMap -->
+<resultMap id="couponResultSet" type="coupon">
+	<id column="COUPON_NO" property="couponNo" />
+	<result column="COUPON_USER" property="couponUser" />
+	<result column="COUPON_NAME" property="couponName" />
+	<result column="COUPON_EXPDATE" property="couponExpDate" />
+	<result column="COUPON_STATUS" property="couponStatus" />
+	<result column="COUPON_LEVEL" property="couponLevel" />
+	<result column="REF_ENO" property="refEno" />
+</resultMap>
+
+
+<!-- 사용자 -->
+<!-- 이벤트 종료여부에 따른 상태값 변경 -->
+<update id="updateEventStatus">
+	UPDATE EVENT
+     SET EVENT_STATUS = 'Y'
+   WHERE END_DATE &lt; SYSDATE
+     AND EVENT_STATUS = 'N'
+</update>
+
+<!-- 241218 한혜원, 이벤트 추천게시글 목록조회 -->
+<select id="selectHotEventList" resultMap="eventResultSet">
+	SELECT EVENT_NO
+	     , EVENT_TITLE
+	     , CHANGE_NAME AS "CONTENTIMG1"
+	     , TO_CHAR(START_DATE, 'YYYY-MM-DD') "START_DATE"
+	     , TO_CHAR(END_DATE, 'YYYY-MM-DD') "END_DATE"
+	  FROM EVENT E
+	  JOIN EVENT_ATTACHMENT ON (EVENT_NO = REF_ENO)
+	 WHERE E.STATUS = 'Y'
+	   AND FILE_LEVEL = 1
+	   AND START_DATE IS NULL OR END_DATE IS NULL
+	 ORDER BY EVENT_NO DESC 
+</select>
+
+<!-- 241212 한혜원, 이벤트 게시글 목록조회 -->
+<select id="selectList" resultMap="eventResultSet">
+	SELECT EVENT_NO
+     , EVENT_TITLE
+     , CHANGE_NAME AS "CONTENTIMG1"
+     , TO_CHAR(START_DATE, 'YYYY-MM-DD') "START_DATE"
+     , TO_CHAR(END_DATE, 'YYYY-MM-DD') "END_DATE"
+  FROM EVENT E
+  JOIN EVENT_ATTACHMENT ON (EVENT_NO = REF_ENO)
+ WHERE E.STATUS = 'Y'  
+   AND FILE_LEVEL = 1
+ ORDER BY EVENT_NO DESC
+</select>
+
+<!-- 241213 한혜원 이벤트 종료여부 필터링 목록조회 -->
+<select id="selectFilterlist" resultMap="eventResultSet">
+	SELECT EVENT_NO
+     , EVENT_TITLE
+     , CHANGE_NAME AS "CONTENTIMG1"
+     , TO_CHAR(START_DATE, 'YYYY-MM-DD') "START_DATE"
+     , TO_CHAR(END_DATE, 'YYYY-MM-DD') "END_DATE" 
+  FROM EVENT E
+  JOIN EVENT_ATTACHMENT ON (EVENT_NO = REF_ENO)
+ WHERE E.EVENT_STATUS = #{eventStatus} 
+   AND E.STATUS = 'Y'  
+   AND FILE_LEVEL = 1
+ ORDER BY EVENT_NO DESC  
+</select>
+
+<!-- 241213 한혜원 이벤트 게시글 상세조회 -->
+<select id="selectEvent" parameterType="_int" resultMap="eventResultSet">
+	SELECT EVENT_NO
+	     , EVENT_TITLE
+	     , CHANGE_NAME AS "CONTENTIMG1"
+	     , TO_CHAR(START_DATE, 'YYYY-MM-DD') "START_DATE"
+	     , TO_CHAR(END_DATE, 'YYYY-MM-DD') "END_DATE"
+	     , EVENT_CONTENT
+	     , EVENT_TYPE
+	     , EVENT_STATUS
+	  FROM EVENT E
+	  JOIN EVENT_ATTACHMENT ON (EVENT_NO = REF_ENO)
+	 WHERE EVENT_NO = #{eventNo}
+	   AND E.STATUS = 'Y'
+	   AND FILE_LEVEL = 1
+</select>
+
+<!-- 241213 한혜원 이벤트 게시글 첨부파일 상세조회 -->
+<select id="selectEventAttachment" resultMap="eventAttachmentResultSet">
+	SELECT EVENT_FILE_NO
+	     , REF_ENO
+	     , ORIGIN_NAME
+	     , CHANGE_NAME
+	     , FILE_PATH
+	     , FILE_LEVEL
+	  FROM EVENT_ATTACHMENT
+	 WHERE REF_ENO = #{eventNo}
+	   AND FILE_LEVEL = 2
+</select>
+
+<!-- 241218 한혜원 이벤트 게시판 댓글 총 갯수 -->
+<select id="selectReplyListCount" resultType="_int">
+	SELECT COUNT(*)
+	  FROM REPLY R
+	 WHERE REF_ENO = #{eventNo}
+	   AND R.STATUS = 'Y'
+</select>
+
+<!-- 241217 한혜원 이벤트 게시판 댓글 목록조회 -->
+<select id="selectReplyList" parameterType="map" resultMap="replyResultSet">
+	SELECT REPLY_NO
+	     , USER_ID AS "REPLY_WRITER"
+	     , REPLY_CONTENT
+	     , TO_CHAR(CREATE_DATE, 'YYYY-MM-DD AM HH:MI:SS') AS "CREATE_DATE"
+	  FROM REPLY R
+	  JOIN MEMBER ON (REPLY_WRITER = USER_NO)
+	 WHERE REF_ENO = #{eventNo}
+	   AND R.STATUS = 'Y'
+	 ORDER BY REPLY_NO DESC  
+</select>
+
+<!-- 241222 한혜원 댓글 중복 확인 -->
+<select id="checkReplyWriter" parameterType="map" resultType="Integer">
+	SELECT COUNT(*)
+	  FROM REPLY
+	 WHERE REF_ENO = #{refEno}
+	   AND REPLY_WRITER = #{replyWriter}
+</select>
+
+<!-- 241217 한혜원 이벤트 게시판 댓글 작성 -->
+<insert id="insertReply" parameterType="reply">
+	INSERT INTO REPLY(REPLY_NO, REF_ENO, REPLY_WRITER, REPLY_CONTENT)
+	VALUES(SEQ_ERNO.NEXTVAL, #{refEno}, #{replyWriter}, #{replyContent})
+</insert>
+
+
+<!-- 241217 한혜원 이벤트 게시판 댓글 수정 -->
+<update id="updateReply" parameterType="map">
+	UPDATE REPLY R
+	   SET REPLY_CONTENT = #{replyContent}
+	 WHERE REPLY_NO = #{replyNo}
+	   AND R.STATUS = 'Y'
+	   AND R.REPLY_WRITER = #{replyWriter}
+</update>
+
+<!-- 241218 한혜원 이벤트 게시판 댓글 삭제 -->
+<update id="deleteReply" parameterType="_int">
+	UPDATE REPLY R
+	   SET STATUS = 'N'
+	 WHERE REPLY_NO = #{replyNo}  
+</update>
+
+<!-- 응모버튼 -->
+<!-- 241219 한혜원 이벤트 게시판 응모자 중복확인 -->
+<select id="checkUserParticipated" parameterType="map" resultType="Integer">
+	SELECT COUNT(*)
+	  FROM APPLICANT
+	 WHERE REF_ENO = #{refEno}
+	   AND USER_NO = #{userNo}
+</select>
+
+<!-- 241219 한혜원 이벤트 게시판 응모자 추가 -->
+<insert id="insertParticipant" parameterType="applicant">
+	INSERT INTO APPLICANT(APPLICANT_NO, REF_ENO, USER_NO, APPLICATION_DATE, DRAWING_STATUS)
+	VALUES(SEQ_ANO.NEXTVAL, #{refEno}, #{userNo}, SYSDATE, 'N')
+</insert>
+
+
+<!-- 관리자 -->
+<!-- 241211 한혜원, 이벤트 게시글 등록 -->
+<insert id="insertEvent" parameterType="event">
+	INSERT INTO EVENT(EVENT_NO, EVENT_TITLE, START_DATE, END_DATE, EVENT_CONTENT, EVENT_TYPE, EVENT_STATUS)
+	VALUES(SEQ_ENO.NEXTVAL, #{eventTitle}, #{startDate}, #{endDate}, #{eventContent}, #{eventType}, #{eventStatus})
+</insert>
+
+<!-- 241211 한혜원, 이벤트 게시글 첨부파일 등록 -->
+<insert id="insertEventAttachment" parameterType="eventAttachment">
+	INSERT INTO EVENT_ATTACHMENT(EVENT_FILE_NO, REF_ENO, ORIGIN_NAME, CHANGE_NAME, FILE_PATH, FILE_LEVEL)
+	VALUES(SEQ_EFNO.NEXTVAL, SEQ_ENO.CURRVAL, #{originName}, #{changeName}, #{filePath}, #{fileLevel})
+</insert>
+
+<!-- 241222 한혜원, 쿠폰 등록 -->
+<insert id="insertCoupon" parameterType="coupon">
+	INSERT INTO COUPON(COUPON_NO, REF_ENO, COUPON_NAME, COUPON_LEVEL, COUPON_EXP_DATE)
+	VALUES(SEQ_CNO.NEXTVAL, SEQ_ENO.CURRVAL, #{couponName}, #{couponLevel}, #{couponExpDate})
+</insert>
+
+<!-- 241218 한혜원, 이벤트 게시글 총 갯수 -->
+<select id="selectListCount" resultType="_int">
+	SELECT COUNT(*)
+	  FROM EVENT
+</select>
+
+<!-- 241218 한혜원, 이벤트 게시글 목록조회 -->
+<select id="adminSelectList" resultMap="eventResultSet">
+	SELECT EVENT_NO
+	     , CHANGE_NAME AS "CONTENTIMG1"
+	     , EVENT_TITLE
+	     , TO_CHAR(START_DATE, 'YYYY-MM-DD') "START_DATE"
+	     , TO_CHAR(END_DATE, 'YYYY-MM-DD') "END_DATE"
+	     , E.EVENT_STATUS
+	     , E.STATUS
+	  FROM EVENT E
+	  JOIN EVENT_ATTACHMENT ON (EVENT_NO = REF_ENO)
+	 WHERE FILE_LEVEL = 1
+	 ORDER BY EVENT_NO DESC
+</select>
+
+<!-- 241218 한혜원, 이벤트 게시글 상세조회 -->
+<select id="adminSelectEvent" parameterType="_int" resultMap="eventResultSet">
+	SELECT EVENT_NO
+	     , EVENT_TITLE
+	     , TO_CHAR(START_DATE, 'YYYY-MM-DD') "START_DATE"
+	     , TO_CHAR(END_DATE, 'YYYY-MM-DD') "END_DATE"
+	     , EVENT_CONTENT
+	     , EVENT_TYPE
+	     , EVENT_STATUS
+	     , CHANGE_NAME AS "CONTENTIMG1"
+	  FROM EVENT
+	  JOIN EVENT_ATTACHMENT ON (EVENT_NO = REF_ENO) 
+	 WHERE EVENT_NO = #{eventNo}
+	   AND FILE_LEVEL = 1
+</select>
+
+<!-- 241218 한혜원, 이벤트 게시글 첨부파일 상세조회 -->
+<select id="adminSelectEventAttachment" resultMap="eventAttachmentResultSet">
+	SELECT EVENT_FILE_NO
+	     , ORIGIN_NAME
+	     , CHANGE_NAME
+	     , FILE_PATH
+	  FROM EVENT_ATTACHMENT
+	 WHERE REF_ENO = #{eventNo}
+	   AND FILE_LEVEL = 2
+</select>
+
+<!-- 241224 한혜원, 이벤트 게시글 수정 -->
+<update id="updateEvent" parameterType="event">
+	UPDATE EVENT 
+	   SET EVENT_TITLE = #{eventTitle}
+	     , START_DATE = #{startDate}
+	     , END_DATE = #{endDate}
+	     , EVENT_CONTENT = #{eventContent}
+	     , CONTENTIMG1 = (SELECT CHANGE_NAME
+                          FROM EVENT_ATTACHMENT EA
+                         WHERE REF_ENO = #{eventNo}
+                           AND FILE_LEVEL = 1) AS "CONTENTIMG1", -- 'fileLevel'에 맞는 조건을 설정
+	     , EVENT_TYPE = #{eventType}
+	     , EVENT_STATUS = #{eventStatus}
+	 WHERE EVENT_NO = #{eventNo}
+	   AND STATUS = 'Y'  
+</update>
+
+<!-- 241224 한혜원, 이벤트 게시글 첨부파일 수정 -->
+<update id="updateEventAttachment" parameterType="eventAttachment">
+	<foreach item="fileNo" index="index" collection="fileNos" open="BEGIN" close="END" separator=";">
+	UPDATE EVENT
+	   SET ORIGIN_NAME = #{originName}
+	     , CHANGE_NAME = #{changeName}
+	     , UPLOAD_DATE = SYSDATE
+	     , STATUS = #{status}
+	 WHERE EVENT_FILE_NO = #{eventFileNo}
+	   AND FILE_LEVEL = 2
+	 </foreach>
+</update>
+
+
+<!-- 한혜원, 이벤트 게시글 삭제 -->
+<update id="deleteEvent" parameterType="_int">
+	UPDATE EVENT
+	   SET STATUS = 'N'
+	 WHERE EVENT_NO = #{eventNo} 
+</update>
+
+<!-- 응모확인 -->
+<!-- 241219 한혜원, 댓글 개수 확인 -->
+<select id="rlistCount" resultType="_int">
+	SELECT COUNT(*)
+	  FROM REPLY
+	 WHERE REF_ENO = #{eventNo}
+</select>
+
+<!-- 241219 한혜원, 댓글 목록조회 -->
+<select id="adminSelectReplyList" resultMap="replyResultSet">
+	SELECT REPLY_NO
+	     , USER_ID AS "REPLY_WRITER"
+	     , REPLY_CONTENT
+	     , TO_CHAR(CREATE_DATE, 'YYYY-MM-DD AM HH:MI:SS') AS "CREATE_DATE"
+	     , DRAWING_STATUS  
+	  FROM REPLY R
+	  JOIN MEMBER ON (REPLY_WRITER = USER_NO)
+	 WHERE R.REF_ENO = #{eventNo}
+	   AND R.STATUS = 'Y'
+	 ORDER BY REPLY_NO DESC
+</select>
+
+<!-- 241219 한혜원, 응모 개수 확인 -->
+<select id="aplistCount" resultType="_int">
+	SELECT COUNT(*)
+	  FROM APPLICANT
+	 WHERE REF_ENO = #{eventNo}
+</select>
+
+<!-- 241219 한혜원, 응모목록조회 -->
+<select id="adminSelectApplicantList" resultMap="applicantResultSet">
+	SELECT APPLICANT_NO
+	     , EVENT_TITLE
+	     , A.USER_NO
+         , USER_ID AS "USER_ID"
+	     , TO_CHAR(APPLICATION_DATE, 'YYYY-MM-DD AM HH:MI:SS') AS "APPLICATION_DATE"
+	     , DRAWING_STATUS
+	     , C.COUPON_NO
+	     ,  A.REF_ENO AS EVENT_NO
+	  FROM APPLICANT A
+	  JOIN MEMBER M ON (A.USER_NO = M.USER_NO)
+	  JOIN EVENT E ON (A.REF_ENO = E.EVENT_NO)
+      JOIN COUPON C ON (A.REF_ENO = C.REF_ENO)
+	 WHERE A.REF_ENO = #{eventNo}
+	 ORDER BY APPLICANT_NO DESC
+</select>
+
+<!-- 쿠폰 발급 후 상태값 변경 -->
+<update id="updateDrawingStatus" parameterType="map">
+	UPDATE APPLICANT
+	   SET DRAWING_STATUS = #{drawingStatus}
+	 WHERE USER_NO = #{userNo}
+	   AND REF_ENO = #{eventNo}
+</update>
+
+<!-- 241223 한혜원 쿠폰 목록 수 -->
+<select id="selectCouponListCount" resultType="_int">
+	SELECT COUNT(*)
+	  FROM COUPON
+	 WHERE REF_ENO = #{evetNo}
+</select>
+
+<!-- 241223 한혜원 쿠폰목록조회 -->
+<select id="selectCouponList" resultMap="couponResultSet">
+		SELECT COUPON_NO
+		     , COUPON_NAME
+		     , TO_CHAR(COUPON_EXP_DATE, 'YYYY-MM-DD') AS "COUPON_EXP_DATE"
+		     , COUPON_STATUS
+		     , COUPON_LEVEL
+		  FROM COUPON C
+		 WHERE REF_ENO = #{eventNo} 
+</select>
+
+
+</mapper>
